@@ -289,7 +289,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         ErrorCollection errorCollection = super.validate(buildConfiguration);
 
         String repoUrl = buildConfiguration.getString(GIT_REPO_URL);
-        repoUrl = variableSubstitutionBean.substituteBambooVariables(repoUrl, null, null, null);
+        repoUrl = variableSubstitutionBean.substituteBambooVariables(repoUrl);
         if (StringUtils.isEmpty(repoUrl))
         {
             errorCollection.addError(GIT_REPO_URL, "Please specify the build's Git Repository");
@@ -563,7 +563,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     public String getSubstitutedRepositoryUrl()
     {
-        return variableSubstitutionBean.substituteBambooVariables(repositoryUrl, null, null, null);
+        return variableSubstitutionBean.substituteBambooVariables(repositoryUrl);
     }
 
     /**

@@ -24,7 +24,7 @@
             Change this property to compile your plugin against different Bamboo
             versions.
         -->
-        <atlassian.product.version>2.1.2</atlassian.product.version>
+        <atlassian.product.version>2.2</atlassian.product.version>
         <jdkLevel>1.5</jdkLevel>
     </properties>
     <build>

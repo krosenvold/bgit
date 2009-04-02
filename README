@@ -3,7 +3,7 @@ ABOUT
 This plugin provides Git support to the excellent Atlassian Bamboo continous
 integration server.
 
-It is compatible with Bamboo 2.1.x but it may work with older 2.x versions.
+It is compatible with Bamboo 2.2.x and above.
 
 
 INSTALLATION
