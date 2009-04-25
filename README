@@ -18,3 +18,15 @@ Right now the plugin is very rough and has very few options but it works.
 
 All the groundwork was done by Don Brown from Atlassian. Until Atlassian can
 provide resources to the plugin I will be mantaining it here on github.
+
+CHANGELOG
+- 2009/04/25: 1.1.1 git submodule support (thanks go for Graeme Mathieson)
+- 2009/04/24: Started tracking changes here
+
+
+CONTRIBUTORS
+
+- Don Brown (original author)
+- i386 (Bamboo 2.2 support)
+- Juan Alonso "slnc" (packaging and updates for bamboo 2.1)
+- Graeme Mathieson (git submodule support)
