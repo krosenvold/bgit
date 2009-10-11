@@ -1,15 +1,5 @@
 ABOUT
 
-== Fork release notes ==
-This should support branches properly. Please note that when changing branches on a build, you still need to
-clean the build using the bamboo console. 
-This should also fix the file list in the commit history view.
-Also, in 1.1.1 you needed to specify “checkout” as a subdirectory name under configuration\builder. This should not be done for this version of the plugin
-(the “checkout” folder is still used in the file structure internally, but the plugin tells bamboo about it so that you dont have to do it on every build!)
-The fix also contains working unit tests for some features.
-
-== End fork release notes ==
-
 This plugin provides Git support to the excellent Atlassian Bamboo continous
 integration server.
 
@@ -29,7 +19,31 @@ Right now the plugin is very rough and has very few options but it works.
 All the groundwork was done by Don Brown from Atlassian. Until Atlassian can
 provide resources to the plugin I will be mantaining it here on github.
 
+==== USAGE WARNING ====
+If you are using SSH make sure to use ssh keys. In general, make sure that a
+background script can pull from your repo. If it can't then Bamboo will not be
+able to checkout neither.
+
+
+1.1.3 RELEASE NOTES
+(big thanks to Kristian Roselvold)
+- This should support branches properly. Please note that when changing
+  branches on a build, you still need to clean the build using the bamboo
+  console. 
+
+- This should also fix the file list in the commit history view.
+
+- Also, in 1.1.1 you needed to specify “checkout” as a subdirectory name under
+  configuration\builder. This should not be done for this version of the plugin
+  (the “checkout” folder is still used in the file structure internally, but
+  the plugin tells bamboo about it so that you dont have to do it on every
+  build!)
+
+- The fix also contains working unit tests for some features.
+
+
 CHANGELOG
+- 2009/10/11: 1.1.2 Several bugfixes and new features
 - 2009/04/25: 1.1.1 git submodule support (thanks go for Graeme Mathieson)
 - 2009/04/24: Started tracking changes here
 
@@ -40,3 +54,4 @@ CONTRIBUTORS
 - i386 (Bamboo 2.2 support)
 - Juan Alonso "slnc" (packaging and updates for bamboo 2.1)
 - Graeme Mathieson (git submodule support)
+- Kristian Rosenvold (several fixes)
