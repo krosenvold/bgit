@@ -1,5 +1,4 @@
 [@ww.label labelKey='repository.git.repository' name='build.buildDefinition.repository.repositoryUrl' /]
-[@ww.label labelKey='repository.git.username' name='build.buildDefinition.repository.username' hideOnNull='true' /]
 [@ww.label labelKey='repository.git.remoteBranch' name='build.buildDefinition.repository.remoteBranch' /]
 
 [#if repository.quietPeriodEnabled]

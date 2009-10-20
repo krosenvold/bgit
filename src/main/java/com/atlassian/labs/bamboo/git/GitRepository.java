@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
@@ -30,10 +29,7 @@ import com.atlassian.bamboo.repository.MutableQuietPeriodAwareRepository;
 import com.atlassian.bamboo.repository.QuietPeriodHelper;
 import com.atlassian.bamboo.repository.Repository;
 import com.atlassian.bamboo.repository.RepositoryException;
-import com.atlassian.bamboo.repository.ViewCvsFileLinkGenerator;
 import com.atlassian.bamboo.repository.WebRepositoryEnabledRepository;
-import com.atlassian.bamboo.security.EncryptionException;
-import com.atlassian.bamboo.security.StringEncrypter;
 import com.atlassian.bamboo.utils.ConfigUtils;
 import com.atlassian.bamboo.utils.error.ErrorCollection;
 import com.atlassian.bamboo.v2.build.BuildChanges;
@@ -56,30 +52,16 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     // ------------------------------------------------------------------------------------------------------- Constants
     public static final String NAME = "Git";
-    //public static final String KEY = "git";
 
     private static final String REPO_PREFIX = "repository.git.";
     public static final String GIT_REPO_URL = REPO_PREFIX + "repositoryUrl";
-    public static final String GIT_USERNAME = REPO_PREFIX + "username";
-    public static final String GIT_PASSWORD = REPO_PREFIX + "userPassword";
-    public static final String GIT_PASSPHRASE = REPO_PREFIX + "passphrase";
-    public static final String GIT_AUTHTYPE = REPO_PREFIX + "authType";
-    public static final String GIT_KEYFILE = REPO_PREFIX + "keyFile";
     public static final String GIT_REMOTE_BRANCH = REPO_PREFIX + "remoteBranch";
 
 
     private static final String USE_EXTERNALS = REPO_PREFIX + "useExternals";
 
-   // private static final String AUTH_SSH = "ssh";
-    private static final String PASSWORD_AUTHENTICATION = "password";
-
     private static final String TEMPORARY_GIT_ADVANCED = "temporary.git.advanced";
 
-    private static final String TEMPORARY_GIT_PASSWORD_CHANGE = "temporary.git.passwordChange";
-    private static final String TEMPORARY_GIT_PASSPHRASE_CHANGE = "temporary.git.passphraseChange";
-    private static final String TEMPORARY_GIT_PASSWORD = "temporary.git.password";
-    private static final String TEMPORARY_GIT_PASSPHRASE = "temporary.git.passphrase";
-    private static final String GIT_AUTH_TYPE = "repository.git.authType";
 
     private static final String EXTERNAL_PATH_MAPPINGS2 = REPO_PREFIX + "externalsToRevisionMappings";
 
@@ -88,11 +70,8 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     private String repositoryUrl;
     private String webRepositoryUrl;
     private String username;
-    private String password;
     private String passphrase;
-    private String keyFile;
     private String webRepositoryUrlRepoName;
-    private String authType;
     private String remoteBranch;
 
     // Quiet Period
@@ -100,6 +79,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     private boolean quietPeriodEnabled = false;
     private int quietPeriod = QuietPeriodHelper.DEFAULT_QUIET_PERIOD;
     private int maxRetries = QuietPeriodHelper.DEFAULT_MAX_RETRIES;
+    private static final long serialVersionUID = -5031786714275269805L;
 
 
     public GitRepository() {
@@ -114,18 +94,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * Maps the path to the latest checked revision
      */
     private Map<String, Long> externalPathRevisionMappings = new HashMap<String, Long>();
-
-    // ---------------------------------------------------------------------------------------------------- Dependencies
-
-    private static final ThreadLocal<StringEncrypter> stringEncrypter = new ThreadLocal<StringEncrypter>() {
-
-        protected StringEncrypter initialValue()
-        {
-            return new StringEncrypter();
-        }
-
-    };
-
 
 
     @NotNull
@@ -429,31 +397,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     public void prepareConfigObject( @NotNull BuildConfiguration buildConfiguration)
     {
-        String repositoryKey = buildConfiguration.getString(SELECTED_REPOSITORY);
-
-        String authType = buildConfiguration.getString(GIT_AUTH_TYPE);
-        if (PASSWORD_AUTHENTICATION.equals(authType))
-        {
-            boolean svnPasswordChanged = buildConfiguration.getBoolean(TEMPORARY_GIT_PASSWORD_CHANGE);
-            if (svnPasswordChanged)
-            {
-                String newPassword = buildConfiguration.getString(TEMPORARY_GIT_PASSWORD);
-                if (getKey().equals(repositoryKey))
-                {
-                    buildConfiguration.setProperty(GitRepository.GIT_PASSWORD, stringEncrypter.get().encrypt(newPassword));
-                }
-            }
-        }
-        else
-        {
-            boolean passphraseChanged = buildConfiguration.getBoolean(TEMPORARY_GIT_PASSPHRASE_CHANGE);
-            if (passphraseChanged)
-            {
-                String newPassphrase = buildConfiguration.getString(TEMPORARY_GIT_PASSPHRASE);
-                buildConfiguration.setProperty(GitRepository.GIT_PASSPHRASE, stringEncrypter.get().encrypt(newPassphrase));
-            }
-        }
-
         // Disabling advanced will clear all advanced
         if (!buildConfiguration.getBoolean(TEMPORARY_GIT_ADVANCED, false))
         {
@@ -467,18 +410,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         super.populateFromConfig(config);
 
         setRepositoryUrl(config.getString(GIT_REPO_URL));
-        setUsername(config.getString(GIT_USERNAME));
         setRemoteBranch(config.getString(GIT_REMOTE_BRANCH));
-        setAuthType(config.getString(GIT_AUTHTYPE));
-        // if (AUTH_SSH.equals(authType))
-        //{
-            setEncryptedPassphrase(config.getString(GIT_PASSPHRASE));
-            setKeyFile(config.getString(GIT_KEYFILE));
-        //}
-        //else
-        //{
-            setEncryptedPassword(config.getString(GIT_PASSWORD));
-        //}
         setWebRepositoryUrl(config.getString(WEB_REPO_URL));
         setWebRepositoryUrlRepoName(config.getString(WEB_REPO_MODULE_NAME));
 
@@ -494,17 +426,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         HierarchicalConfiguration configuration = super.toConfiguration();
         configuration.setProperty(GIT_REPO_URL, getRepositoryUrl());
         configuration.setProperty(GIT_REMOTE_BRANCH, getRemoteBranch());
-        configuration.setProperty(GIT_USERNAME, getUsername());
-        configuration.setProperty(GIT_AUTHTYPE, getAuthType());
-        //if (AUTH_SSH.equals(authType))
-        //{
-            configuration.setProperty(GIT_PASSPHRASE, getEncryptedPassphrase());
-            configuration.setProperty(GIT_KEYFILE, getKeyFile());
-        //}
-        //else
-        //{
-            configuration.setProperty(GIT_PASSWORD, getEncryptedPassword());
-        //}
         configuration.setProperty(WEB_REPO_URL, getWebRepositoryUrl());
         configuration.setProperty(WEB_REPO_MODULE_NAME, getWebRepositoryUrlRepoName());
 
@@ -541,79 +462,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return NAME;
     }
 
-    public String getPassphrase()
-    {
-        try
-        {
-            StringEncrypter stringEncrypter = new StringEncrypter();
-            return stringEncrypter.decrypt(passphrase);
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-
-    public void setPassphrase(String passphrase)
-    {
-        try
-        {
-            if (StringUtils.isNotEmpty(passphrase))
-            {
-                StringEncrypter stringEncrypter = new StringEncrypter();
-                this.passphrase = stringEncrypter.encrypt(passphrase);
-            }
-            else
-            {
-                this.passphrase = passphrase;
-            }
-        }
-        catch (EncryptionException e)
-        {
-            log.debug("Failed to encrypt password", e);
-            this.passphrase = null;
-        }
-    }
-
-    public String getEncryptedPassphrase()
-    {
-        return passphrase;
-    }
-
-    public void setEncryptedPassphrase(String encryptedPassphrase)
-    {
-        passphrase = encryptedPassphrase;
-    }
-
-    public String getKeyFile()
-    {
-        return keyFile;
-    }
-
-    public void setKeyFile(String myKeyFile)
-    {
-        this.keyFile = myKeyFile;
-    }
-
-    public String getAuthType()
-    {
-        return authType;
-    }
-
-    public void setAuthType(String authType)
-    {
-        this.authType = authType;
-    }
-
-    /**
-     * Where is the documentation and help about using Subversion?
-     *
-     * @return The web url
-     */
-    public String getUrl()
-    {
-        return "http://subversion.tigris.org/";
-    }
 
     /**
      * Specify the subversion repository we are using
@@ -661,79 +509,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return variableSubstitutionBean.substituteBambooVariables(repositoryUrl);
     }
 
-    /**
-     * What's the username (if any) we are using to acces the repository?
-     *
-     * @param username The user name, null if there is no user
-     */
-    public void setUsername(String username)
-    {
-        this.username = StringUtils.trim(username);
-    }
-
-    /**
-     * What username are we using to access the repository?
-     *
-     * @return The username, null if we are not using user authentication
-     */
-    public String getUsername()
-    {
-        return username;
-    }
-
-    /**
-     * Specify the password required to access the resposotory
-     *
-     * @param password The password (null if we are not using user authentication)
-     */
-    public void setUserPassword(String password)
-    {
-        try
-        {
-            if (StringUtils.isNotEmpty(password))
-            {
-                StringEncrypter stringEncrypter = new StringEncrypter();
-                this.password = stringEncrypter.encrypt(password);
-            }
-            else
-            {
-                this.password = password;
-            }
-        }
-        catch (EncryptionException e)
-        {
-            log.error("Failed to encrypt password", e);
-            this.password = null;
-        }
-    }
-
-    /**
-     * What password are we using to access the repository
-     *
-     * @return The password (null if we are not using user authentication)
-     */
-    public String getUserPassword()
-    {
-        try
-        {
-            StringEncrypter stringEncrypter = new StringEncrypter();
-            return stringEncrypter.decrypt(password);
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-
-    public String getEncryptedPassword()
-    {
-        return password;
-    }
-
-    public void setEncryptedPassword(String encryptedPassword)
-    {
-        password = encryptedPassword;
-    }
 
 
     public boolean hasWebBasedRepositoryAccess()
@@ -763,27 +538,13 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     public String getWebRepositoryUrlForFile(CommitFile file)
     {
-        ViewCvsFileLinkGenerator fileLinkGenerator = new ViewCvsFileLinkGenerator(webRepositoryUrl);
         return null;//fileLinkGenerator.getWebRepositoryUrlForFile(file, webRepositoryUrlRepoName, ViewCvsFileLinkGenerator.GIT_REPO_TYPE);
     }
 
-    public String getWebRepositoryUrlForDiff(CommitFile file)
-    {
-        ViewCvsFileLinkGenerator fileLinkGenerator = new ViewCvsFileLinkGenerator(webRepositoryUrl);
-        return null;// fileLinkGenerator.getWebRepositoryUrlForDiff(file, webRepositoryUrlRepoName, ViewCvsFileLinkGenerator.GIT_REPO_TYPE);
-    }
-
-    public String getWebRepositoryUrlForRevision(CommitFile file)
-    {
-        ViewCvsFileLinkGenerator fileLinkGenerator = new ViewCvsFileLinkGenerator(webRepositoryUrl);
-        return null;// fileLinkGenerator.getWebRepositoryUrlForRevision(file, webRepositoryUrlRepoName, ViewCvsFileLinkGenerator.GIT_REPO_TYPE);
-    }
 
     @Override
-    
     public String getWebRepositoryUrlForCommit( @NotNull Commit commit)
     {
-        ViewCvsFileLinkGenerator fileLinkGenerator = new ViewCvsFileLinkGenerator(webRepositoryUrl);
         return null;// fileLinkGenerator.getWebRepositoryUrlForCommit(commit, webRepositoryUrlRepoName, ViewCvsFileLinkGenerator.GIT_REPO_TYPE);
     }
 
@@ -842,8 +603,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return new HashCodeBuilder(101, 11)
                 .append(getKey())
                 .append(getRepositoryUrl())
-                .append(getUsername())
-                .append(getEncryptedPassword())
                 .append(getWebRepositoryUrl())
                 .append(getWebRepositoryUrlRepoName())
                 .append(getTriggerIpAddress())
@@ -859,26 +618,9 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         GitRepository rhs = (GitRepository) o;
         return new EqualsBuilder()
                 .append(getRepositoryUrl(), rhs.getRepositoryUrl())
-                .append(getUsername(), rhs.getUsername())
-                .append(getEncryptedPassword(), rhs.getEncryptedPassword())
                 .append(getWebRepositoryUrl(), rhs.getWebRepositoryUrl())
                 .append(getWebRepositoryUrlRepoName(), rhs.getWebRepositoryUrlRepoName())
                 .append(getTriggerIpAddress(), rhs.getTriggerIpAddress())
                 .isEquals();
     }
-
-    public int compareTo(Object obj)
-    {
-        GitRepository o = (GitRepository) obj;
-        return new CompareToBuilder()
-                .append(getRepositoryUrl(), o.getRepositoryUrl())
-                .append(getUsername(), o.getUsername())
-                .append(getEncryptedPassword(), o.getEncryptedPassword())
-                .append(getWebRepositoryUrl(), o.getWebRepositoryUrl())
-                .append(getWebRepositoryUrlRepoName(), o.getWebRepositoryUrlRepoName())
-                .append(getTriggerIpAddress(), o.getTriggerIpAddress())
-                .toComparison();
-    }
-
-
 }

@@ -18,7 +18,6 @@ import com.atlassian.bamboo.repository.RepositoryException;
 
 /**
  * @author Kristian Rosenvold
- * Testing {@link com.atlassian.labs.bamboo.git.ExampleReport}
  */
 public class GitRepositoryTest
 {
