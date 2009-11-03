@@ -3,37 +3,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    
+
     <parent>
         <groupId>com.atlassian.bamboo.plugins.base</groupId>
         <artifactId>bamboo-plugin-base</artifactId>
         <version>5</version>
     </parent>
-    
-    
+
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.atlassian.labs.bamboo.git</groupId>
     <artifactId>git-plugin</artifactId>
     <version>1.1.5</version>
-    
+
     <name>Bamboo Git plugin</name>
     <packaging>atlassian-plugin</packaging>
-    
+
     <build>
-      <plugins><plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <configuration>
-            <source>1.5</source>
-            <target>1.5</target>
-          </configuration>
-        </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <scm>
-        <connection>scm:svn:http://svn.atlassian.com/svn/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</connection>
-        <developerConnection>scm:svn:https://svn.atlassian.com/svn/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</developerConnection>
+        <connection>scm:svn:http://svn.atlassian.com/svn/public/atlassian/bamboo/plugins/bamboo-plugin-archetype
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.atlassian.com/svn/public/atlassian/bamboo/plugins/bamboo-plugin-archetype
+        </developerConnection>
         <url>http://svn.atlassian.com/fisheye/browse/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</url>
     </scm>
 
@@ -54,25 +58,29 @@
             <layout>legacy</layout>
         </repository>
         <repository>
-            <id>jboss-with-jms</id> <!-- This repo is included because it contains jms-1.1.jar ;) -->
+            <id>jboss-with-jms</id>
+            <!-- This repo is included because it contains jms-1.1.jar ;) -->
             <url>http://repository.jboss.com/maven2</url>
         </repository>
-        
-        
+        <repository>
+            <id>jgit-snapshot-repository</id>
+            <url>http://egit.googlecode.com/svn/maven/</url>
+        </repository>
+
 
     </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>atlassian-public</id>
-                    <url>https://maven.atlassian.com/repository/public</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                    <releases>
-                        <enabled>true</enabled>
-                    </releases>
-                </pluginRepository>
-            </pluginRepositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>atlassian-public</id>
+            <url>https://maven.atlassian.com/repository/public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -80,11 +88,16 @@
             <groupId>junit</groupId>
             <version>4.7</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>jgit</artifactId>
+            <version>0.6.0-23-g36af95b7</version>
+        </dependency>
     </dependencies>
 
     <properties>
         <atlassian.plugin.key>com.atlassian.labs.bamboo.git.git-plugin</atlassian.plugin.key>
         <atlassian.product.version>2.2</atlassian.product.version>
         <jdkLevel>1.5</jdkLevel>
-    </properties>    
+    </properties>
 </project>

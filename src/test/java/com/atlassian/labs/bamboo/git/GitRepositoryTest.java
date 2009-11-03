@@ -24,7 +24,7 @@ import com.atlassian.bamboo.repository.RepositoryException;
 public class GitRepositoryTest
 {
     private static String getGitHubRepoUrl() {
-        return "git://github.com/alexjfisher/bgit-unittest.git";
+        return "git://github.com/krosenvold/bgit-unittest.git";
     }
 
 
