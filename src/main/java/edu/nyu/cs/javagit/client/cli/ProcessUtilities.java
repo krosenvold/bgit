@@ -132,7 +132,7 @@ public class ProcessUtilities {
   public static CommandResponse runCommand(File workingDirectory, List<String> commandLine,
       IParser parser) throws IOException, JavaGitException {
     ProcessBuilder pb = new ProcessBuilder(commandLine);
-    System.err.println("============ command:"+commandLine);
+     System.err.println("============ command:"+commandLine);
     if (workingDirectory != null) {
       pb.directory(workingDirectory);
     }

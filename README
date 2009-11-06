@@ -1,5 +1,15 @@
 ABOUT
 
+== Fork release notes ==
+This should support branches properly. Please note that when changing branches on a build, you still need to
+clean the build using the bamboo console. 
+This should also fix the file list in the commit history view.
+Also, in 1.1.1 you needed to specify “checkout” as a subdirectory name under configuration\builder. This should not be done for this version of the plugin
+(the “checkout” folder is still used in the file structure internally, but the plugin tells bamboo about it so that you dont have to do it on every build!)
+The fix also contains working unit tests for some features.
+
+== End fork release notes ==
+
 This plugin provides Git support to the excellent Atlassian Bamboo continous
 integration server.
 

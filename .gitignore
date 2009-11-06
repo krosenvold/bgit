@@ -5,3 +5,6 @@
 target
 *.log
 bin
+testRepo1
+testRepo2
+

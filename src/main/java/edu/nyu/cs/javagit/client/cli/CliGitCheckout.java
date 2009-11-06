@@ -291,8 +291,8 @@ public class CliGitCheckout implements IGitCheckout {
     }
 
     private String extractBranchName(String line) {
-      int startIndex = line.indexOf('"');
-      int endIndex = line.indexOf('"', startIndex + 1);
+      int startIndex = Math.max( line.indexOf('"'), line.indexOf('\''));
+      int endIndex = Math.max(line.indexOf('"', startIndex + 1), line.indexOf('\'', startIndex + 1));
       return line.substring(startIndex, endIndex + 1);
     }
 

@@ -1,0 +1,7 @@
+This project is a standard maven project, that can be built with mvn install
+the atlassian stuff is referenced in the standard maven way.
+
+You WILL need jms.jar v. 1.1 though. After you have downloaded it, you can use 
+the enclosed script to install it;
+
+./installJms <path-to>/jms-1.1.jar

@@ -13,7 +13,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.atlassian.labs.bamboo.git</groupId>
     <artifactId>git-plugin</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     
     <name>Bamboo Git plugin</name>
     <packaging>atlassian-plugin</packaging>
@@ -70,5 +70,48 @@
         <developerConnection>scm:svn:https://svn.atlassian.com/svn/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</developerConnection>
         <url>http://svn.atlassian.com/fisheye/browse/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</url>
     </scm>
-    
+
+    <repositories>
+        <repository>
+            <id>atlassian-public</id>
+            <url>https://maven.atlassian.com/repository/public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>atlassian-m1-repository</id>
+            <url>https://maven.atlassian.com/maven1</url>
+            <layout>legacy</layout>
+        </repository>
+
+    </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>atlassian-public</id>
+                    <url>https://maven.atlassian.com/repository/public</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                </pluginRepository>
+            </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <artifactId>junit</artifactId>
+            <groupId>junit</groupId>
+            <version>4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+        </dependency>
+    </dependencies>
 </project>
