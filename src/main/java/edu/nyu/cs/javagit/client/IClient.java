@@ -126,6 +126,12 @@ public interface IClient {
    */
   public IGitClone getGitCloneInstance();
 
+  /**
+   * Gets an instance of <code>IGitSubmodule</code>
+   * 
+   * @return An instance of <code>IGitSubmodule</code>
+   */
+  public IGitSubmodule getGitSubmoduleInstance();
 
     IGitMerge getGitMergeInstance();
 

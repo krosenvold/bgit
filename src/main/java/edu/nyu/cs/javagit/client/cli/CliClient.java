@@ -34,6 +34,7 @@ import edu.nyu.cs.javagit.client.IGitRevert;
 import edu.nyu.cs.javagit.client.IGitRm;
 import edu.nyu.cs.javagit.client.IGitShow;
 import edu.nyu.cs.javagit.client.IGitStatus;
+import edu.nyu.cs.javagit.client.IGitSubmodule;
 
 /**
  * Command-line implementation of the <code>IClient</code> interface.
@@ -98,6 +99,10 @@ public class CliClient implements IClient {
 
   public IGitClone getGitCloneInstance() {
     return new CliGitClone();
+  }
+
+  public IGitSubmodule getGitSubmoduleInstance() {
+    return new CliGitSubmodule();
   }
 
     public IGitMerge getGitMergeInstance()
