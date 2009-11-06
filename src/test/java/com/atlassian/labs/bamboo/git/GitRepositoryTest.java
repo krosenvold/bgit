@@ -10,7 +10,6 @@ import com.atlassian.bamboo.commit.CommitFile;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
 import edu.nyu.cs.javagit.api.commands.GitCloneOptions;
-import edu.nyu.cs.javagit.client.cli.CliGitClone;
 import org.junit.Test;
 import org.junit.BeforeClass;
 import org.junit.After;
@@ -30,11 +29,10 @@ public class GitRepositoryTest
 
     @BeforeClass
     public static void getFromGitHub() throws IOException, JavaGitException {
-        File masterRepoDir = getMasterRepoWorkingDirectory();
-        if ( !GitRepository.containsValidRepo(getMasterRepoCheckoutDirectory())){
-            CliGitClone clone = new CliGitClone();
+        final File localRepo = getMasterRepoCheckoutDirectory();
+        if ( !GitRepository.containsValidRepo(localRepo)){
             GitCloneOptions gitCloneOptions = new GitCloneOptions(false, false, true);
-            clone.clone(getCheckoutDirectory(masterRepoDir), gitCloneOptions, getGitHubRepoUrl(),  getMasterRepoCheckoutDirectory());
+            GitRepository.clone( getGitHubRepoUrl(), localRepo, gitCloneOptions);
         }
     }
 
@@ -47,31 +45,111 @@ public class GitRepositoryTest
 
     @Test
     public void testClone() throws IOException, JavaGitException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "feature1");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
         
         assertFalse( GitRepository.containsValidRepo( sourceDir));
         gitRepository.cloneOrFetch(sourceDir);
         assertTrue( GitRepository.containsValidRepo( sourceDir));
 
-        assertEquals("feature1", gitRepository.gitStatus(sourceDir).getName());
+        assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
     }
+
+    private File getFreshCheckoutDir() {
+        return getCheckoutDirectory(getFreshWorkingCopyDir());
+    }
+
 
     @Test
     public void testCloneDefault() throws IOException, JavaGitException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), null);
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
+        GitRepository gitRepository = getGitRepository(null);
+        File sourceDir = getFreshCheckoutDir();
         gitRepository.cloneOrFetch(sourceDir);
         assertEquals("featureDefault", gitRepository.gitStatus(sourceDir).getName());
     }
 
     @Test
     public void testIsOnBranch() throws IOException, JavaGitException {
-        GitRepository gitRepository = new GitRepository(getGitHubRepoUrl(), null);
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        makeWorkingCopy();
+        GitRepository gitRepository = getGitRepository( null);
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
         assertTrue(gitRepository.isOnBranch(sourceDir, Ref.createBranchRef("featureDefault")));
         assertFalse(gitRepository.isOnBranch(sourceDir, Ref.createBranchRef("feature1")));
+    }
+
+
+    @Test
+    public void testHistory() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository( "featureDefault");
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(COMMIT_1_Initial.getSha().getSha(), results, sourceDir, "UT-KEY");
+
+        assertHistoryMatch( results, getFeatureDefault(), 1);
+    }
+
+    @Test
+    public void testHistoryFeature1() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository( "feature1");
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(COMMIT_1_Initial.getSha().getSha(), results, sourceDir, "UT-KEY");
+
+        assertHistoryMatch( results, getFeature1(), 1);
+    }
+    @Test
+    public void testHistoryFeature2() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository( "feature2");
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(COMMIT_1_Initial.getSha().getSha(), results, sourceDir, "UT-KEY");
+
+        assertHistoryMatch( results, getFeature2(), 1);
+    }
+
+    @Test
+    public void testNonLinearHistory() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository( "featureDefault");
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+
+        gitRepository.detectCommitsForUrl(COMMIT_7_featureDefault1.getSha().getSha(), results, sourceDir, "UT-KEY");
+        assertEquals(0, results.size());
+
+        results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(COMMIT_6_featureDefault1.getSha().getSha(), results, sourceDir, "UT-KEY");
+        COMMIT_7_featureDefault1.assertMatch( results.get(0));
+
+        results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(COMMIT_5_featureDefault1.getSha().getSha()  , results, sourceDir, "UT-KEY");
+        assertHistoryMatch( results, getFeatureDefault(), 3);
+        COMMIT_7_featureDefault1.assertMatch( results.get(0));
+    }
+
+    @Test
+    public void testPluginUpgrade() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository( "featureDefault");
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl("Fri Oct 9 15:38:10 2009 +0200", results, sourceDir, "UT-KEY");
+
+        assertEquals(3, results.size());
+    }
+
+    @Test
+    public void testLastCheckedRevisionIsNull() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository("featureDefault");
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(null, results, sourceDir, "UT-KEY");
+
+        assertEquals(5, results.size());
     }
 
     private static final CommitDescriptor COMMIT_1_Initial = new CommitDescriptor(new Sha("84965cc8dfc8af7fca02c78373413aceafc73c2f"), "Comments");
@@ -103,108 +181,37 @@ public class GitRepositoryTest
         return result;
     }
 
-    @Test
-    public void testHistory() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "featureDefault");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        makeWorkingCopy();
-
-        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), COMMIT_1_Initial.getSha().getSha(), results, sourceDir, "UT-KEY");
-
-        assertHistoryMatch( results, getFeatureDefault(), 1);
-    }
-
-    @Test
-    public void testHistoryFeature1() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "feature1");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        gitRepository.cloneOrFetch( sourceDir);
-
-        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), COMMIT_1_Initial.getSha().getSha(), results, sourceDir, "UT-KEY");
-
-        assertHistoryMatch( results, getFeature1(), 1);
-    }
-    @Test
-    public void testHistoryFeature2() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "feature2");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        gitRepository.cloneOrFetch( sourceDir);
-
-        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), COMMIT_1_Initial.getSha().getSha(), results, sourceDir, "UT-KEY");
-
-        assertHistoryMatch( results, getFeature2(), 1);
-    }
-
-    @Test
-    public void testNonLinearHistory() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "featureDefault");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        makeWorkingCopy();
-
-        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), COMMIT_7_featureDefault1.getSha().getSha(), results, sourceDir, "UT-KEY");
-        assertEquals(0, results.size());
-
-        results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), COMMIT_6_featureDefault1.getSha().getSha(), results, sourceDir, "UT-KEY");
-        COMMIT_7_featureDefault1.assertMatch( results.get(0));
-
-        results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), COMMIT_5_featureDefault1.getSha().getSha()  , results, sourceDir, "UT-KEY");
-        assertHistoryMatch( results, getFeatureDefault(), 3);
-        COMMIT_7_featureDefault1.assertMatch( results.get(0));
-    }
-
-    @Test
-    public void testPluginUpgrade() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "featureDefault");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        makeWorkingCopy();
-
-        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "Fri Oct 9 15:38:10 2009 +0200", results, sourceDir, "UT-KEY");
-
-        assertEquals(3, results.size());
-    }
-
-    @Test
-    public void testLastCheckedRevisionIsNull() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "featureDefault");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        makeWorkingCopy();
-
-        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), null, results, sourceDir, "UT-KEY");
-
-        assertEquals(5, results.size());
-    }
-
     private static File getMasterRepoWorkingDirectory() {
         File masterRepoDir = new File("masterRepo");
         ensureDirExists(masterRepoDir);
         return masterRepoDir;
-    }
-    private static File getMasterRepoCheckoutDirectory() {
-        try {
-            final File file = new File(getMasterRepoWorkingDirectory().getCanonicalPath() + File.separator + "checkout");
-            ensureDirExists( file);
-            return file;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static File getWorkingCopyDir() {
         return new File("testRepo");
     }
 
+    
+    private static File getMasterRepoCheckoutDirectory() {
+        return getMasterRepoCheckoutDirectory(getMasterRepoWorkingDirectory().getPath());
+    }
+    private static File getCWDRelativeMasterRepoCheckoutDirectory() {
+        return getMasterRepoCheckoutDirectory(".." + File.separator + getMasterRepoWorkingDirectory().getPath());
+    }
+    private static File getMasterRepoCheckoutDirectory(String localPart) {
+        try {
+            final File file = new File(localPart + File.separator + GitRepository.getLocalCheckoutSubfolder());
+            ensureDirExists( file);
+            return file;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     private static File getCheckoutDirectory(File workingDirectory){
         try {
-            return new File(workingDirectory.getCanonicalPath() + File.separator + "checkout");
+            return new File(workingDirectory.getCanonicalPath() + File.separator + GitRepository.getLocalCheckoutSubfolder());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -255,13 +262,19 @@ public class GitRepositoryTest
 
     }
 
-    private void makeWorkingCopy() throws IOException, JavaGitException {
-        CliGitClone clone = new CliGitClone();
-        GitCloneOptions gitCloneOptions = new GitCloneOptions(false, true, false);
-        clone.clone(new File("."),  gitCloneOptions, getMasterRepoCheckoutDirectory().getCanonicalPath(), getCheckoutDirectory( getWorkingCopyDir()));
+
+     private File getFreshCopyInCheckoutDir(GitRepository gitRepository) throws IOException, JavaGitException {
+        final File directory = getCheckoutDirectory(getFreshWorkingCopyDir());
+//        GitCloneOptions gitCloneOptions = new GitCloneOptions(false, true, false);
+        gitRepository.cloneOrFetch( directory);
+        return directory;
+    }
+
+
+    private GitRepository getGitRepository(String remoteBranch) throws IOException {
+        return new GitRepository(getCWDRelativeMasterRepoCheckoutDirectory().getPath(), remoteBranch);
     }
     
-
     static class Sha {
         private final String sha;
 

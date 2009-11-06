@@ -33,17 +33,7 @@ import edu.nyu.cs.javagit.client.IGitClone;
  */
 public class CliGitClone implements IGitClone {
 
-  public GitCloneResponseImpl clone(File workingDirectoryPath, String repository) throws IOException,
-      JavaGitException {
-    return cloneProcess(workingDirectoryPath, null, repository, new File("checkout"));
-  }
-
-  public GitCloneResponseImpl clone(File workingDirectoryPath, GitCloneOptions options, String repository)
-      throws IOException, JavaGitException {
-    return cloneProcess(workingDirectoryPath, options, repository, new File("checkout"));
-  }
-
-  public GitCloneResponseImpl clone(File workingDirectoryPath, String repository, File directory)
+    public GitCloneResponseImpl clone(File workingDirectoryPath, String repository, File directory)
       throws IOException, JavaGitException {
     return cloneProcess(workingDirectoryPath, null, repository, directory);
   }

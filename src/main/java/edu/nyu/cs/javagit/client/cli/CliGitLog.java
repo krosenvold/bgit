@@ -133,14 +133,14 @@ public class CliGitLog implements IGitLog{
 			 * 	List all logs since specified date.
 			 */
 			if (options.isOptLimitCommitSince()) {
-				command.add("--since=\""+ options.getOptLimitSince()+"\"");
+				command.add("--since='"+ options.getOptLimitSince()+"'");
 			}
 
 			/**
 			 * 	List all logs after specified date.
 			 */
 			if (options.isOptLimitCommitAfter()) {
-				command.add("--after=\""+ options.getOptLimitAfter()+"\"");
+				command.add("--after='"+ options.getOptLimitAfter()+"'");
 			}
 
 			/**

@@ -79,6 +79,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     private int quietPeriod = QuietPeriodHelper.DEFAULT_QUIET_PERIOD;
     private int maxRetries = QuietPeriodHelper.DEFAULT_MAX_RETRIES;
     private static final long serialVersionUID = -5031786714275269805L;
+    private static final File cwdFile = new File(".");
 
 
     public GitRepository() {
@@ -111,7 +112,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             final List<Commit> commits = new ArrayList<Commit>();
 
             
-            final String latestRevisionOnSvnServer = detectCommitsForUrl(repositoryUrl, lastVcsRevisionKey, commits, sourceDir, planKey);
+            final String latestRevisionOnSvnServer = detectCommitsForUrl(lastVcsRevisionKey, commits, sourceDir, planKey);
 
             log.debug("last revision:"+latestRevisionOnSvnServer);
 
@@ -154,7 +155,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
                 File sourceDir = getCheckoutDirectory(planKey); // sourceedir = xxx/checkout
                 cloneOrFetch(sourceDir);
                 submodule_update(sourceDir);
-                return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
+                return detectCommitsForUrl(vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
         } catch (IOException e) {
             throw new RepositoryException("retrieveSourceCode", e);
         } catch (JavaGitException e) {
@@ -166,7 +167,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      *
      * Detects the commits for the given repositpry since the revision and HEAD for that URL
      *
-     * @param repositoryUrl - the URL to chaeck
      * @param lastRevisionChecked - latest revision checked for this URL. Null if never checked
      * @param commits - the commits are added to this list
      * @param checkoutDir The directory to check out to
@@ -177,7 +177,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * @throws JavaGitException when something goes wrong
      */
 
-    String detectCommitsForUrl( String repositoryUrl, String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
+    String detectCommitsForUrl(String lastRevisionChecked, final List<Commit> commits, File checkoutDir, String planKey) throws RepositoryException, IOException, JavaGitException
     {
         log.debug("detecting commits for "+lastRevisionChecked);
 
@@ -343,8 +343,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             merge.merge(sourceDir, branchWithOriginPrefix);
         } else {
             log.debug("no repo found, creating");
-            CliGitClone clone = new CliGitClone();
-            clone.clone(sourceDir.getParentFile(), repositoryUrl);
+            clone(repositoryUrl, sourceDir, null);
             submodule_update(sourceDir);
 
             if (isRemoteBranchSpecified()) {
@@ -361,9 +360,35 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
+    void clone(File sourceDir, GitCloneOptions gitCloneOptions) throws IOException, JavaGitException {
+        clone( repositoryUrl, sourceDir, gitCloneOptions);
+    }
+    static void clone(String repositoryUrl, File sourceDir, GitCloneOptions gitCloneOptions) throws IOException, JavaGitException {
+        ensureDirExists( sourceDir);
+        CliGitClone clone = new CliGitClone();
+        if (sourceDir.exists()) sourceDir.delete();
+        File parentDir = sourceDir.getParentFile();
+        String parentDirS = parentDir.getPath();
+        String checkoutDir = sourceDir.getPath().substring( parentDirS.length() + 1);
+        if (gitCloneOptions == null)
+            gitCloneOptions = new GitCloneOptions();
+        clone.clone(parentDir, repositoryUrl, new File(checkoutDir));
+    }
+
+    static void ensureDirExists(File dir) {
+        if (!dir.exists()){
+            //noinspection ResultOfMethodCallIgnored
+            dir.mkdir();
+        }
+    }
+
+    public static File getLocalCheckoutSubfolder() {
+        return new File("checkout");
+    }
+
+
     static boolean containsValidRepo(File sourceDir) throws IOException {
         return sourceDir.exists() &&  (new File( sourceDir.getCanonicalPath() + File.separator + ".git").exists() || new File( sourceDir.getCanonicalPath() + File.separator + "HEAD").exists()); 
-
     }
 
     boolean isOnBranch(File sourceDir, Ref branchName) throws IOException, JavaGitException {

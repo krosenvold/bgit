@@ -1,9 +1,0 @@
-You need apache maven to build this project.
-This project is a standard maven project, build with "mvn install".
-
-The jar file will be located in your target directory, install by typing:
-
-cp target/git-plugin-1.1.3.jar $BAMBOO_INSTALL_DIR/webapp/WEB-INF/lib
-
-Make sure you delete old versions of the plugin under WEB-INF/lib
-

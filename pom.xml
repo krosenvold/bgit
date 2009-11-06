@@ -10,6 +10,11 @@
         <version>5</version>
     </parent>
 
+     <!-- parent>
+        <groupId>com.atlassian.pom</groupId>
+        <artifactId>atlassian-plugin-pom</artifactId>
+        <version>1</version>
+    </parent -->
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.atlassian.labs.bamboo.git</groupId>
@@ -83,6 +88,16 @@
     </pluginRepositories>
 
     <dependencies>
+        <!-- dependency>
+            <groupId>com.atlassian.bamboo</groupId>
+            <artifactId>atlassian-bamboo-api</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.bamboo</groupId>
+            <artifactId>atlassian-bamboo-core</artifactId>
+            <version>2.2</version>
+        </dependency -->
         <dependency>
             <artifactId>junit</artifactId>
             <groupId>junit</groupId>
@@ -93,6 +108,7 @@
             <artifactId>jgit</artifactId>
             <version>0.6.0-23-g36af95b7</version>
         </dependency>
+        
     </dependencies>
 
     <properties>
