@@ -294,7 +294,7 @@ public final class GitStatusOptions {
    */
   public void setAuthor(String author) {
     CheckUtilities.checkStringArgument(author, "Author name for override");
-    this.author = author;
+    this.author = author.replace('<', ' ').replace('>', ' ');
   }
 
   /**

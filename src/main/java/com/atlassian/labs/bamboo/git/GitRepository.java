@@ -376,15 +376,15 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         setUsername(config.getString(GIT_USERNAME));
         setRemoteBranch(config.getString(GIT_REMOTE_BRANCH));
         setAuthType(config.getString(GIT_AUTHTYPE));
-        if (AUTH_SSH.equals(authType))
-        {
+        // if (AUTH_SSH.equals(authType))
+        //{
             setEncryptedPassphrase(config.getString(GIT_PASSPHRASE));
             setKeyFile(config.getString(GIT_KEYFILE));
-        }
-        else
-        {
+        //}
+        //else
+        //{
             setEncryptedPassword(config.getString(GIT_PASSWORD));
-        }
+        //}
         setWebRepositoryUrl(config.getString(WEB_REPO_URL));
         setWebRepositoryUrlRepoName(config.getString(WEB_REPO_MODULE_NAME));
 
@@ -402,15 +402,15 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         configuration.setProperty(GIT_REMOTE_BRANCH, getRemoteBranch());
         configuration.setProperty(GIT_USERNAME, getUsername());
         configuration.setProperty(GIT_AUTHTYPE, getAuthType());
-        if (AUTH_SSH.equals(authType))
-        {
+        //if (AUTH_SSH.equals(authType))
+        //{
             configuration.setProperty(GIT_PASSPHRASE, getEncryptedPassphrase());
             configuration.setProperty(GIT_KEYFILE, getKeyFile());
-        }
-        else
-        {
+        //}
+        //else
+        //{
             configuration.setProperty(GIT_PASSWORD, getEncryptedPassword());
-        }
+        //}
         configuration.setProperty(WEB_REPO_URL, getWebRepositoryUrl());
         configuration.setProperty(WEB_REPO_MODULE_NAME, getWebRepositoryUrlRepoName());
 

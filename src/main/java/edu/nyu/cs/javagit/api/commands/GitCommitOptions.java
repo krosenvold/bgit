@@ -117,7 +117,7 @@ public class GitCommitOptions {
    *          The value to use as the author name for a commit.
    */
   public void setAuthor(String author) {
-    this.author = author;
+    this.author = author.replace('<', ' ').replace('>', ' ');
   }
 
   /**

@@ -73,7 +73,7 @@ public class GitLogResponse implements CommandResponse {
 	 * @param author This sets the author for a commit.
 	 */
 	public void setAuthor(String author){
-		this.author = author;
+		this.author = author.replace('<', ' ').replace('>', ' ');
 	}
 	/**
 	 * 
@@ -214,7 +214,7 @@ public class GitLogResponse implements CommandResponse {
 		 * @return This return the name of the author of the commit.
 		 */
 		public String getAuthor() {
-			return author;
+			return author.replace('<', ' ').replace('>', ' ');
 		}
 		
 		/**
@@ -257,7 +257,7 @@ public class GitLogResponse implements CommandResponse {
 		 * @param author This sets the Author of a particular commit.
 		 */
 		public void setAuthor(String author) {
-			this.author = author; 
+			this.author = author.replace('<', ' ').replace('>', ' '); 
 		}
 		/**
 		 * 

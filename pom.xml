@@ -13,7 +13,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.atlassian.labs.bamboo.git</groupId>
     <artifactId>git-plugin</artifactId>
-    <version>1.1</version>
+    <version>1.1.1</version>
     
     <name>Bamboo Git plugin</name>
     <packaging>atlassian-plugin</packaging>

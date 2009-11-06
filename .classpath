@@ -26,7 +26,6 @@
 	<classpathentry kind="lib" path="/home/slnc/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="/home/slnc/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar"/>
 	<classpathentry kind="lib" path="/home/slnc/.m2/repository/webwork/webwork/12Dec05-jiratld/webwork-12Dec05-jiratld.jar"/>
-	<classpathentry kind="lib" path="/home/slnc/action.required/webwork-2.2.7/webwork-2.2.7.jar"/>
 	<classpathentry kind="lib" path="/home/slnc/.m2/repository/opensymphony/oscore/2.2.4/oscore-2.2.4.jar"/>
 	<classpathentry kind="output" path="target/test-classes"/>
 </classpath>
