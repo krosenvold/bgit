@@ -24,6 +24,10 @@ If you are using SSH make sure to use ssh keys. In general, make sure that a
 background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
+1.1.5 RELEASE NOTES
+
+- Fixed problem with rebased repos where out-of order dates would cause bamboo to loop infinitely.
+
 1.1.4 RELEASE NOTES
 
 - Commit SHA1 numbers are included in top-level build log.

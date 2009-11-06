@@ -36,6 +36,9 @@ public class GitLogOptions {
 	private String optLimitSince = null;
 	private boolean optLimitCommitAfter = false;
 	private String optLimitAfter = null;
+    private boolean optLimitCommitRange = false;
+    private String  optLimitRangeStart = null;
+    private String  optLimitRangeEnd = null;
 	private boolean optLimitComitUntil = false;
 	private String optLimitUntil = null;
 	private boolean optLimitCommitBefore = false;
@@ -199,7 +202,27 @@ public class GitLogOptions {
 		this.optLimitCommitAfter = optLimitCommitAfter;
 		setOptLimitAfter(optLimitAfter);
 	}
-	
+
+    /**
+     *
+     * @return true If commits are limited by range.
+     */
+    public boolean isOptLimitCommitRange() {
+        return optLimitCommitRange;
+    }
+
+    /**
+     *
+     * @param optLimitCommitRange	Enable/Disable commit limiting by a range
+     * @param optLimitRangeStart    First commit in range
+     * @param optLimitRangeEnd      Last commit in range
+     */
+    public void setOptLimitCommitRange(boolean optLimitCommitRange, String optLimitRangeStart, String optLimitRangeEnd) {
+        this.optLimitCommitRange = optLimitCommitRange;
+        setOptLimitRangeStart(optLimitRangeStart);
+        setOptLimitRangeEnd(optLimitRangeEnd);
+    }
+
 	/**
 	 * 
 	 * @return	true If commits are limited until a specified date.
@@ -413,6 +436,18 @@ public class GitLogOptions {
 	}
 	private void setOptLimitAfter(String optLimitAfter) {
 		this.optLimitAfter = optLimitAfter;
+	}
+    public String getOptLimitRangeStart() {
+        return optLimitRangeStart;
+    }
+    public String getOptLimitRangeEnd() {
+        return optLimitRangeEnd;
+    }
+    private void setOptLimitRangeStart(String optLimitRangeStart) {
+        this.optLimitRangeStart = optLimitRangeStart;
+	}
+    private void setOptLimitRangeEnd(String optLimitRangeEnd) {
+        this.optLimitRangeEnd = optLimitRangeEnd;
 	}
 	public String getOptLimitUntil() {
 		return optLimitUntil;

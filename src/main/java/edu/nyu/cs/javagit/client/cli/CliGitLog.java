@@ -150,6 +150,13 @@ public class CliGitLog implements IGitLog{
 				command.add("--until="+ options.getOptLimitUntil());
 			}
 
+            /**
+			 * 	List all logs within a range of commits.
+			 */
+			if (options.isOptLimitCommitRange()) {
+				command.add(options.getOptLimitRangeStart() + ".." + options.getOptLimitRangeEnd());
+			}
+
 			/**
 			 * 	List all logs before specified date.
 			 */
