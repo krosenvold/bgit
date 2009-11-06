@@ -4,11 +4,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <parent>
+    <!-- parent>
         <groupId>com.atlassian.bamboo.plugins.base</groupId>
         <artifactId>bamboo-plugin-base</artifactId>
         <version>5</version>
-    </parent>
+    </parent -->
 
      <!-- parent>
         <groupId>com.atlassian.pom</groupId>
@@ -22,7 +22,7 @@
     <version>1.1.5</version>
 
     <name>Bamboo Git plugin</name>
-    <packaging>atlassian-plugin</packaging>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>
@@ -88,7 +88,7 @@
     </pluginRepositories>
 
     <dependencies>
-        <!-- dependency>
+        <dependency>
             <groupId>com.atlassian.bamboo</groupId>
             <artifactId>atlassian-bamboo-api</artifactId>
             <version>2.2</version>
@@ -97,17 +97,18 @@
             <groupId>com.atlassian.bamboo</groupId>
             <artifactId>atlassian-bamboo-core</artifactId>
             <version>2.2</version>
-        </dependency -->
+        </dependency>
         <dependency>
             <artifactId>junit</artifactId>
             <groupId>junit</groupId>
             <version>4.7</version>
+<scope>test</scope>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>jgit</artifactId>
             <version>0.6.0-23-g36af95b7</version>
-        </dependency>
+        </dependency -->
         
     </dependencies>
 
