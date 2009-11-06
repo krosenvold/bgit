@@ -16,6 +16,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.atlassian.bamboo.author.Author;
 import com.atlassian.bamboo.author.AuthorImpl;
@@ -41,7 +42,6 @@ import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
 import com.opensymphony.util.UrlUtils;
 
-import edu.nyu.cs.javagit.api.DotGit;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
 import edu.nyu.cs.javagit.api.commands.*;
@@ -56,7 +56,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     // ------------------------------------------------------------------------------------------------------- Constants
     public static final String NAME = "Git";
-    public static final String KEY = "git";
+    //public static final String KEY = "git";
 
     private static final String REPO_PREFIX = "repository.git.";
     public static final String GIT_REPO_URL = REPO_PREFIX + "repositoryUrl";
@@ -70,7 +70,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     private static final String USE_EXTERNALS = REPO_PREFIX + "useExternals";
 
-    private static final String AUTH_SSH = "ssh";
+   // private static final String AUTH_SSH = "ssh";
     private static final String PASSWORD_AUTHENTICATION = "password";
 
     private static final String TEMPORARY_GIT_ADVANCED = "temporary.git.advanced";
@@ -101,6 +101,15 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     private int quietPeriod = QuietPeriodHelper.DEFAULT_QUIET_PERIOD;
     private int maxRetries = QuietPeriodHelper.DEFAULT_MAX_RETRIES;
 
+
+    public GitRepository() {
+    }
+
+    public GitRepository(String repositoryUrl, String remoteBranch) {
+        this.repositoryUrl = repositoryUrl;
+        this.remoteBranch = remoteBranch;
+    }
+
     /**
      * Maps the path to the latest checked revision
      */
@@ -118,10 +127,11 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     };
 
 
-    
-    public synchronized BuildChanges collectChangesSinceLastBuild( String planKey,  String lastVcsRevisionKey) throws RepositoryException
+
+    @NotNull
+    public synchronized  BuildChanges collectChangesSinceLastBuild( @NotNull String planKey, @NotNull String lastVcsRevisionKey) throws RepositoryException
     {
-        log.error("determining if there have been changes for " + planKey + " since "+lastVcsRevisionKey);
+        log.debug("determining if there have been changes for " + planKey + " since "+lastVcsRevisionKey);
         try
         {
 
@@ -129,58 +139,136 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
             File sourceDir = getCheckoutDirectory(planKey);    //  Project/checkout is value
 
-            cloneOrFetch(sourceDir, repositoryUrl);
+            cloneOrFetch(sourceDir);
             
             final List<Commit> commits = new ArrayList<Commit>();
 
             
             final String latestRevisionOnSvnServer = detectCommitsForUrl(repositoryUrl, lastVcsRevisionKey, commits, sourceDir, planKey);
 
-            String lastRevisionChecked = latestRevisionOnSvnServer;
-            log.error("last revision:"+lastRevisionChecked);
+            log.debug("last revision:"+latestRevisionOnSvnServer);
 
-            return new BuildChangesImpl(String.valueOf(lastRevisionChecked), commits);
+            return new BuildChangesImpl(String.valueOf(latestRevisionOnSvnServer), commits);
         } catch (IOException e)
-        {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        {                                                      
+            throw new RepositoryException("collectChangesSinceLastBuild", e);
         } catch (JavaGitException e)
         {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new RepositoryException("collectChangesSinceLastBuild", e);
         }
-        return null;
     }
 
-    private DotGit fetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException
+
+    @Override
+    public boolean referencesDifferentRepository() {
+        //Ref ref = gitStatus(new File("checkout"));
+        //return !ref.getName().equals( remoteBranch);
+        // Also check repo url
+        return super.referencesDifferentRepository();
+    }
+
+    @NotNull
+    @Override
+    public File getSourceCodeDirectory(@NotNull String s) throws RepositoryException {
+        File codeDirectory = super.getSourceCodeDirectory(s);
+        try {
+            return new File(codeDirectory.getCanonicalPath() + File.separator + "checkout");  
+        } catch (IOException e) {
+            throw new RepositoryException("getSourceCodeDirectory", e);
+        }
+    }
+
+    @NotNull public String retrieveSourceCode( @NotNull String planKey, @Nullable String vcsRevisionKey) throws RepositoryException
     {
-        log.debug("fetching repo");
-        DotGit dotGit = DotGit.getInstance(sourceDir);
-        if (!sourceDir.exists()) {
-            log.debug("no repo found, creating");
-            CliGitClone clone = new CliGitClone();
-            clone.clone(sourceDir.getParentFile(), repositoryUrl);
-
-            submodule_update(sourceDir);
+        log.debug("retrieving source code");
+        try
+        {
+                String repositoryUrl = getSubstitutedRepositoryUrl();
+                File sourceDir = getCheckoutDirectory(planKey); // sourceedir = xxx/checkout
+                cloneOrFetch(sourceDir);
+                submodule_update(sourceDir);
+                return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
+        } catch (IOException e) {
+            throw new RepositoryException("retrieveSourceCode", e);
+        } catch (JavaGitException e) {
+            throw new RepositoryException(e.getMessage(), e);
         }
-        CliGitFetch fetch = new CliGitFetch();
-        log.debug("doing fetch");
-        fetch.fetch(sourceDir);
-        log.debug("fetch complete");
-
-        return dotGit;
     }
 
-    private DotGit clone(File sourceDir, String repositoryUrl) throws IOException, JavaGitException
+    /**
+     *
+     * Detects the commits for the given repositpry since the revision and HEAD for that URL
+     *
+     * @param repositoryUrl - the URL to chaeck
+     * @param lastRevisionChecked - latest revision checked for this URL. Null if never checked
+     * @param commits - the commits are added to this list
+     * @param checkoutDir The directory to check out to
+     * @param planKey - used for debugging only
+     * @return The date/time of the last commit found.
+     * @throws RepositoryException when something goes wrong
+     * @throws IOException when something goes wrong
+     * @throws JavaGitException when something goes wrong
+     */
+
+    String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
     {
-        DotGit dotGit = DotGit.getInstance(sourceDir);
-        if (!sourceDir.exists()) {
-            log.debug("no repo found, creating");
-            CliGitClone clone = new CliGitClone();
-            clone.clone(sourceDir.getParentFile(), repositoryUrl);
-
-            submodule_update(sourceDir);
+        log.debug("detecting commits for "+lastRevisionChecked);
+        GitLog gitLog = new GitLog();
+        GitLogOptions opt = new GitLogOptions();
+        if (lastRevisionChecked != null)
+        {
+            opt.setOptLimitCommitAfter(true, lastRevisionChecked);
         }
-        return dotGit;
+
+        opt.setOptFileDetails(true);
+        List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/"+remoteBranch));
+        if (gitCommits.size() > 1)
+        {
+            gitCommits.remove(gitCommits.size()-1);  // Because lastRevisionChecked is included
+            log.debug("commits found:"+gitCommits.size());
+            String startRevision = gitCommits.get(gitCommits.size() - 1).getDateString();
+            String latestRevisionOnServer = gitCommits.get(0).getDateString();
+            log.info("Collecting changes for '" + planKey + "' on path '" + repositoryUrl + "' from version " + startRevision + " to " + latestRevisionOnServer);
+
+            for (GitLogResponse.Commit logEntry : gitCommits)
+            {
+                CommitImpl commit = new CommitImpl();
+                String authorName = logEntry.getAuthor();
+
+                // it is possible to have commits with empty committer. BAM-2945
+                if (StringUtils.isBlank(authorName))
+                {
+                    log.info("Author name is empty for " + commit.toString());
+                    authorName = Author.UNKNOWN_AUTHOR;
+                }
+                commit.setAuthor(new AuthorImpl(authorName));
+                @SuppressWarnings({"deprecation"}) Date date2 = new Date(logEntry.getDateString());
+                commit.setDate(date2);
+
+                String msg = logEntry.getMessage() + " (version " + logEntry.getSha() + ")";
+                commit.setComment(msg);
+                List<CommitFile> files = new ArrayList<CommitFile>();
+
+                if (logEntry.getFiles() != null) {
+                    for (GitLogResponse.CommitFile file : logEntry.getFiles())
+                    {
+                        CommitFileImpl commitFile = new CommitFileImpl();
+                        commitFile.setName(file.getName());
+                        commitFile.setRevision(logEntry.getSha());
+                        files.add(commitFile);
+                    }
+                }
+                commit.setFiles(files);
+
+                commits.add(commit);
+            }
+            return latestRevisionOnServer;
+        }
+        log.debug("returning last revision:"+lastRevisionChecked);
+        return lastRevisionChecked;
     }
+
+
 
      Ref gitStatus(File sourceDir) throws IOException, JavaGitException {
          GitStatus gitStatus = new GitStatus();
@@ -200,7 +288,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     private void submodule_update(File sourceDir) throws IOException, JavaGitException
     {
-        log.error("doing submodule update");
+        log.debug("doing submodule update");
         CliGitSubmodule submodule = new CliGitSubmodule();
         submodule.init(sourceDir);
         submodule.update(sourceDir);
@@ -208,157 +296,88 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     private File getCheckoutDirectory(String planKey) throws RepositoryException
     {
-        return new File(getSourceCodeDirectory(planKey), "checkout");
+        return getSourceCodeDirectory(planKey);
     }
 
-    /**
-     *
-     * Detects the commits for the given repositpry since the revision and HEAD for that URL
-     *
-     * @param repositoryUrl - the URL to chaeck
-     * @param lastRevisionChecked - latest revision checked for this URL. Null if never checked
-     * @param commits - the commits are added to this list
-     * @param planKey - used for debugging only
-     * @return The date/time of the last commit found.
-     */
-    
-    String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
-    {
-        log.error("detecting commits for "+lastRevisionChecked);
-        GitLog gitLog = new GitLog();
-        GitLogOptions opt = new GitLogOptions();
-        if (lastRevisionChecked != null)
-        {
-            opt.setOptLimitCommitAfter(true, lastRevisionChecked);
-        }
-        opt.setOptFileDetails(true);
-        List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/"+remoteBranch));
-        if (gitCommits.size() > 1)
-        {
-            gitCommits.remove(gitCommits.size()-1);  // Because lastRevisionChecked is included
-            log.error("commits found:"+gitCommits.size());
-            String startRevision = gitCommits.get(gitCommits.size() - 1).getDateString();
-            String latestRevisionOnServer = gitCommits.get(0).getDateString();
-            log.info("Collecting changes for '" + planKey + "' on path '" + repositoryUrl + "' from version " + startRevision + " to " + latestRevisionOnServer);
 
-            for (GitLogResponse.Commit logEntry : gitCommits)
-            {
-                CommitImpl commit = new CommitImpl();
-                String authorName = logEntry.getAuthor();
 
-                // it is possible to have commits with empty committer. BAM-2945
-                if (StringUtils.isBlank(authorName))
-                {
-                    log.info("Author name is empty for " + commit.toString());
-                    authorName = Author.UNKNOWN_AUTHOR;
-                }
-                commit.setAuthor(new AuthorImpl(authorName));
-                commit.setDate(new Date(logEntry.getDateString()));
-                commit.setComment(logEntry.getMessage());
-                List<CommitFile> files = new ArrayList();
-
-                if (logEntry.getFiles() != null) {
-                    for (GitLogResponse.CommitFile file : logEntry.getFiles())
-                    {
-                        CommitFileImpl commitFile = new CommitFileImpl();
-                        commitFile.setName(file.getName());
-                        commitFile.setRevision(logEntry.getSha());
-                        files.add(commitFile);
-                    }
-                }
-                commit.setFiles(files);
-
-                commits.add(commit);
-            }
-            return latestRevisionOnServer;
-        }
-        log.error("returning last revision:"+lastRevisionChecked);
-        return lastRevisionChecked;
-    }
-
-    @Override
-    public boolean referencesDifferentRepository() {
-        File cwd = new File(".");
-        String foo = null;
-        try {
-            foo = cwd.getCanonicalPath();
-            System.out.println("foo = " + foo);
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        //Ref ref = gitStatus(new File("checkout"));
-        //return !ref.getName().equals( remoteBranch);
-        // Also check repo url
-        return super.referencesDifferentRepository();
-    }
-
-    @NotNull
-    @Override
-    public File getSourceCodeDirectory(@NotNull String s) throws RepositoryException {
-        File codeDirectory = super.getSourceCodeDirectory(s);
-        try {
-            return new File(codeDirectory.getCanonicalPath() + "/checkout");    //To change body of overridden methods use File | Settings | File Templates.
-        } catch (IOException e) {
-            throw new RepositoryException("getSourceCodeDirectory", e);
-        }
-    }
-
-    public String retrieveSourceCode( String planKey, String vcsRevisionKey) throws RepositoryException
-    {
-        log.error("retrieving source code");
-        try
-        {
-            return retreiveSourceCodeWithException(planKey, vcsRevisionKey);
-        } catch (IOException e) {
-            throw new RepositoryException("retrieveSourceCode", e);
-        } catch (JavaGitException e) {
-            throw new RepositoryException("retrieveSourceCode", e);
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------------- Constructors
-
-    // -------------------------------------------------------------------------------------------------- Public Methods
-
-    public void addDefaultValues( BuildConfiguration buildConfiguration)
+    public void addDefaultValues( @NotNull BuildConfiguration buildConfiguration)
     {
         super.addDefaultValues(buildConfiguration);
         quietPeriodHelper.addDefaultValues(buildConfiguration);
     }
 
-    String retreiveSourceCodeWithException(String planKey, String vcsRevisionKey) throws RepositoryException, IOException, JavaGitException
-    {
-        String repositoryUrl = getSubstitutedRepositoryUrl();
-                          //  vcsRevisonKey == Fri Oct 9 14:51:41 2009 +0200
-        File sourceDir = getCheckoutDirectory(planKey);
-                            // sourceedir = xxx/checkout
-        cloneOrFetch(sourceDir, repositoryUrl);
 
-        submodule_update(sourceDir);
+    /**
+     * Clones or fetches the specified repository.
+     *
+     * This method supports exactly 2 use cases:
+     * A) A clone of a repository. When cloning, the proper branch is checked if it is not correct by default.
+     * B) A fetch. Since the repo is created by use case A, it will always be on the proper branch.
+     *
+     * If we ever should support switching branches, it should be considered realized by ditching the
+     * entire repository, probably using the isRepositoryDifferent method or similar.
+     *
+     * @param sourceDir The checkout directory
+     * @throws IOException When something bad happens
+     * @throws JavaGitException When something else bad happens.
+     */
+    void cloneOrFetch(File sourceDir) throws IOException, JavaGitException {
+        Ref branchWithOriginPrefix = Ref.createBranchRef("origin/" + this.remoteBranch);
 
-        return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
-    }
+        if (containsValidRepo(sourceDir)) {
+            CliGitFetch fetch = new CliGitFetch();
+            log.debug("doing fetch");
+            fetch.fetch(sourceDir);
+            log.debug("fetch complete");
 
-    void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
-        Ref remoteBranch = Ref.createBranchRef("origin/" + this.remoteBranch);
-
-        if (sourceDir.exists()) {
-            fetch(sourceDir, repositoryUrl);
-            log.error("doing merge");
+            log.debug("doing merge");
             GitMerge merge = new GitMerge();
             // FIXME: should really only merge to the target revision
-            merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
+            merge.merge(sourceDir, branchWithOriginPrefix);
         } else {
-            clone( sourceDir, repositoryUrl);
-            if (isRemoteBranchSpecified()) checkout( sourceDir, remoteBranch, Ref.createBranchRef(this.remoteBranch) );
+            log.debug("no repo found, creating");
+            CliGitClone clone = new CliGitClone();
+            clone.clone(sourceDir.getParentFile(), repositoryUrl);
+            submodule_update(sourceDir);
+
+            if (isRemoteBranchSpecified()) {
+                Ref desiredBranch = Ref.createBranchRef(this.remoteBranch);
+                GitBranchResponse branchList = getAllBranches(sourceDir);
+                boolean branchFound = branchList.containsBranch( branchWithOriginPrefix);
+                if (!branchFound) {
+                    throw new JavaGitException(12, "The branch " + branchWithOriginPrefix.getName() + " does not exist");
+                }
+                if (!branchList.getCurrentBranch().equals( desiredBranch)) {
+                    checkout( sourceDir, branchWithOriginPrefix, desiredBranch);
+                }
+            }
         }
     }
+
+    static boolean containsValidRepo(File sourceDir) throws IOException {
+        return sourceDir.exists() &&  (new File( sourceDir.getCanonicalPath() + File.separator + ".git").exists() || new File( sourceDir.getCanonicalPath() + File.separator + "HEAD").exists()); 
+
+    }
+
+    boolean isOnBranch(File sourceDir, Ref branchName) throws IOException, JavaGitException {
+        GitBranchResponse response = getAllBranches(sourceDir);
+        return response.getCurrentBranch().equals( branchName);
+    }
+
+    private GitBranchResponse getAllBranches(File sourceDir) throws IOException, JavaGitException {
+        GitBranch gitBranch = new GitBranch();
+        GitBranchOptions gitBranchOptions = new GitBranchOptions();
+        gitBranchOptions.setOptA(true);
+        return gitBranch.branch(sourceDir, gitBranchOptions);
+    }
+
 
     private boolean isRemoteBranchSpecified(){
         return remoteBranch != null;
     }
 
-    public ErrorCollection validate( BuildConfiguration buildConfiguration)
+    @NotNull public ErrorCollection validate( @NotNull BuildConfiguration buildConfiguration)
     {
         ErrorCollection errorCollection = super.validate(buildConfiguration);
 
@@ -386,19 +405,20 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
 
         quietPeriodHelper.validate(buildConfiguration, errorCollection);
-        log.error("validation results:"+errorCollection);
+        log.debug("validation results:"+errorCollection);
         return errorCollection;
     }
 
 
-    public boolean isRepositoryDifferent( Repository repository)
+    public boolean isRepositoryDifferent(@NotNull Repository repository)
     {
-        if (repository != null && repository instanceof GitRepository)
+        if (repository instanceof GitRepository)
         {
-            GitRepository svn = (GitRepository) repository;
+            GitRepository existing = (GitRepository) repository;
             return !new EqualsBuilder()
-                    .append(this.getName(), svn.getName())
-                    .append(getRepositoryUrl(), svn.getRepositoryUrl())
+                    .append(this.getName(), existing.getName())
+                    .append(this.getRepositoryUrl(), existing.getRepositoryUrl())
+                    .append(this.getRemoteBranch(), existing.getRemoteBranch())
                     .isEquals();
         }
         else
@@ -407,7 +427,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-    public void prepareConfigObject( BuildConfiguration buildConfiguration)
+    public void prepareConfigObject( @NotNull BuildConfiguration buildConfiguration)
     {
         String repositoryKey = buildConfiguration.getString(SELECTED_REPOSITORY);
 
@@ -442,7 +462,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-    public void populateFromConfig( HierarchicalConfiguration config)
+    public void populateFromConfig( @NotNull HierarchicalConfiguration config)
     {
         super.populateFromConfig(config);
 
@@ -469,7 +489,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
     
-    public HierarchicalConfiguration toConfiguration()
+    @NotNull public HierarchicalConfiguration toConfiguration()
     {
         HierarchicalConfiguration configuration = super.toConfiguration();
         configuration.setProperty(GIT_REPO_URL, getRepositoryUrl());
@@ -501,6 +521,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public boolean isAdvancedOptionEnabled( BuildConfiguration buildConfiguration)
     {
         final boolean useExternals = buildConfiguration.getBoolean(USE_EXTERNALS, false);
@@ -515,7 +536,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * @return The name
      */
     
-    public String getName()
+    @NotNull public String getName()
     {
         return NAME;
     }
@@ -549,7 +570,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
         catch (EncryptionException e)
         {
-            log.error("Failed to encrypt password", e);
+            log.debug("Failed to encrypt password", e);
             this.passphrase = null;
         }
     }
@@ -704,7 +725,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-
     public String getEncryptedPassword()
     {
         return password;
@@ -761,7 +781,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     @Override
     
-    public String getWebRepositoryUrlForCommit( Commit commit)
+    public String getWebRepositoryUrlForCommit( @NotNull Commit commit)
     {
         ViewCvsFileLinkGenerator fileLinkGenerator = new ViewCvsFileLinkGenerator(webRepositoryUrl);
         return null;// fileLinkGenerator.getWebRepositoryUrlForCommit(commit, webRepositoryUrlRepoName, ViewCvsFileLinkGenerator.GIT_REPO_TYPE);

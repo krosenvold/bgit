@@ -58,6 +58,15 @@ abstract public class GitBranchResponse implements CommandResponse {
     listOfBranchRecord = new ArrayList<BranchRecord>();
   }
 
+    public boolean containsBranch(Ref branch){
+        for (Ref foundbranch : branchList ){
+            if (foundbranch.isThisBranch( branch)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
   public boolean equals(Object o) {
     if (!(o instanceof GitBranchResponse)) {
       return false;

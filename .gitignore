@@ -5,6 +5,6 @@
 target
 *.log
 bin
-testRepo1
-testRepo2
+testRepo
+masterRepo
 

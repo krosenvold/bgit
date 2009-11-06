@@ -304,6 +304,18 @@ public class Ref {
     }
   }
 
+    public boolean isThisBranch(Ref other) {
+
+      if (!CheckUtilities.checkObjectsEqual(refType, other.getRefType())) {
+        return false;
+      }
+
+      if (! name.endsWith( other.getName())){
+        return false;
+      }
+      return true;
+    }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Ref)) {

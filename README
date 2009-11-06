@@ -24,9 +24,13 @@ If you are using SSH make sure to use ssh keys. In general, make sure that a
 background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
+1.1.4 RELEASE NOTES
+
+- Commit SHA1 numbers are included in top-level build log.
+- Better error message when non-existing branch is selected for build
 
 1.1.3 RELEASE NOTES
-(big thanks to Kristian Roselvold)
+(big thanks to Kristian Rosenvold)
 - This should support branches properly. Please note that when changing
   branches on a build, you still need to clean the build using the bamboo
   console. 

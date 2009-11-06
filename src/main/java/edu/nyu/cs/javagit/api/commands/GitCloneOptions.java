@@ -20,5 +20,49 @@ package edu.nyu.cs.javagit.api.commands;
  * A class to manage passing options to the <code>GitClone</code> command.
  */
 public class GitCloneOptions {
+    /**
+     * Make mirror copy.
+     */
+    private boolean mirror;
 
+    /**
+     * Do not use hardlinks when cloning in local file system.
+     */
+    private boolean nohardlinks;
+
+    private boolean bare;
+
+
+    public GitCloneOptions() {
+    }
+
+    public GitCloneOptions(boolean mirror, boolean nohardlinks, boolean bare) {
+        this.mirror = mirror;
+        this.nohardlinks = nohardlinks;
+        this.bare = bare;
+    }
+
+    public boolean isMirror() {
+        return mirror;
+    }
+
+    public void setMirror(boolean mirror) {
+        this.mirror = mirror;
+    }
+
+    public boolean isNohardlinks() {
+        return nohardlinks;
+    }
+
+    public void setNohardlinks(boolean nohardlinks) {
+        this.nohardlinks = nohardlinks;
+    }
+
+    public boolean isBare() {
+        return bare;
+    }
+
+    public void setBare(boolean bare) {
+        this.bare = bare;
+    }
 }

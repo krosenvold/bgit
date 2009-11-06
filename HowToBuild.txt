@@ -1,7 +1,9 @@
-This project is a standard maven project, that can be built with mvn install
-the atlassian stuff is referenced in the standard maven way.
+You need apache maven to build this project.
+This project is a standard maven project, build with "mvn install".
 
-You WILL need jms.jar v. 1.1 though. After you have downloaded it, you can use 
-the enclosed script to install it;
+The jar file will be located in your target directory, install by typing:
 
-./installJms <path-to>/jms-1.1.jar
+cp target/git-plugin-1.1.3.jar $BAMBOO_INSTALL_DIR/webapp/WEB-INF/lib
+
+Make sure you delete old versions of the plugin under WEB-INF/lib
+
