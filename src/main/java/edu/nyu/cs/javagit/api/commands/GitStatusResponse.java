@@ -18,16 +18,16 @@ package edu.nyu.cs.javagit.api.commands;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import edu.nyu.cs.javagit.api.GitFileSystemObject;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.utilities.CheckUtilities;
 import edu.nyu.cs.javagit.api.GitFileSystemObject.Status;
+import edu.nyu.cs.javagit.utilities.CheckUtilities;
 
 /**
  * A response data object for &lt;git-status&gt; command

@@ -2,13 +2,10 @@ package edu.nyu.cs.javagit.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.commands.GitInitOptions;
 import edu.nyu.cs.javagit.api.commands.GitInitResponse;
-import edu.nyu.cs.javagit.api.commands.GitLogOptions;
-import edu.nyu.cs.javagit.api.commands.GitLogResponse.Commit;
 
 
 public interface IGitInit {

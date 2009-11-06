@@ -1,8 +1,6 @@
 package com.atlassian.labs.bamboo.git;
 
-import java.util.Map;
-
-import com.atlassian.bamboo.reports.charts.*;
+import com.atlassian.bamboo.reports.charts.BambooReportLineChart;
 
 /**
  * A basic chart.

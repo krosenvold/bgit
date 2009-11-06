@@ -16,10 +16,10 @@
  */
 package edu.nyu.cs.javagit.api;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.nyu.cs.javagit.api.commands.GitLog;
 import edu.nyu.cs.javagit.api.commands.GitLogOptions;

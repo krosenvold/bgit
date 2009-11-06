@@ -1,12 +1,37 @@
 package com.atlassian.labs.bamboo.git;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.atlassian.bamboo.author.Author;
 import com.atlassian.bamboo.author.AuthorImpl;
 import com.atlassian.bamboo.commit.Commit;
 import com.atlassian.bamboo.commit.CommitFile;
 import com.atlassian.bamboo.commit.CommitFileImpl;
 import com.atlassian.bamboo.commit.CommitImpl;
-import com.atlassian.bamboo.repository.*;
+import com.atlassian.bamboo.repository.AbstractRepository;
+import com.atlassian.bamboo.repository.InitialBuildAwareRepository;
+import com.atlassian.bamboo.repository.MutableQuietPeriodAwareRepository;
+import com.atlassian.bamboo.repository.QuietPeriodHelper;
+import com.atlassian.bamboo.repository.Repository;
+import com.atlassian.bamboo.repository.RepositoryException;
+import com.atlassian.bamboo.repository.ViewCvsFileLinkGenerator;
+import com.atlassian.bamboo.repository.WebRepositoryEnabledRepository;
 import com.atlassian.bamboo.security.EncryptionException;
 import com.atlassian.bamboo.security.StringEncrypter;
 import com.atlassian.bamboo.utils.ConfigUtils;
@@ -16,6 +41,7 @@ import com.atlassian.bamboo.v2.build.BuildChangesImpl;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
 import com.opensymphony.util.UrlUtils;
+
 import edu.nyu.cs.javagit.api.DotGit;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
@@ -23,24 +49,8 @@ import edu.nyu.cs.javagit.api.commands.GitLog;
 import edu.nyu.cs.javagit.api.commands.GitLogOptions;
 import edu.nyu.cs.javagit.api.commands.GitLogResponse;
 import edu.nyu.cs.javagit.api.commands.GitMerge;
-import edu.nyu.cs.javagit.client.cli.CliGitRemote;
-import edu.nyu.cs.javagit.client.cli.CliGitFetch;
 import edu.nyu.cs.javagit.client.cli.CliGitClone;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.CompareToBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
+import edu.nyu.cs.javagit.client.cli.CliGitFetch;
 
 public class GitRepository extends AbstractRepository implements WebRepositoryEnabledRepository, InitialBuildAwareRepository, MutableQuietPeriodAwareRepository
 {
@@ -58,6 +68,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     public static final String GIT_PASSPHRASE = REPO_PREFIX + "passphrase";
     public static final String GIT_AUTHTYPE = REPO_PREFIX + "authType";
     public static final String GIT_KEYFILE = REPO_PREFIX + "keyFile";
+    public static final String GIT_REMOTE_BRANCH = REPO_PREFIX + "remoteBranch";
 
 
     private static final String USE_EXTERNALS = REPO_PREFIX + "useExternals";
@@ -85,6 +96,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     private String keyFile;
     private String webRepositoryUrlRepoName;
     private String authType;
+    private String remoteBranch;
 
     // Quiet Period
     private final QuietPeriodHelper quietPeriodHelper = new QuietPeriodHelper(REPO_PREFIX);
@@ -112,16 +124,16 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     // -------------------------------------------------------------------------------------------------- Public Methods
 
-    public void addDefaultValues(@NotNull BuildConfiguration buildConfiguration)
+    public void addDefaultValues( BuildConfiguration buildConfiguration)
     {
         super.addDefaultValues(buildConfiguration);
         quietPeriodHelper.addDefaultValues(buildConfiguration);
     }
 
-    @NotNull
-    public synchronized BuildChanges collectChangesSinceLastBuild(@NotNull String planKey, @NotNull String lastVcsRevisionKey) throws RepositoryException
+    
+    public synchronized BuildChanges collectChangesSinceLastBuild( String planKey,  String lastVcsRevisionKey) throws RepositoryException
     {
-        log.error("determing  if there have been changes since "+lastVcsRevisionKey);
+        log.error("determining if there have been changes for " + planKey + " since "+lastVcsRevisionKey);
         try
         {
 
@@ -183,8 +195,8 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * @param planKey - used for debugging only
      * @return
      */
-    @NotNull
-    private String detectCommitsForUrl(@NotNull String repositoryUrl, @Nullable final String lastRevisionChecked, @NotNull final List<Commit> commits, @NotNull String planKey) throws RepositoryException, IOException, JavaGitException
+    
+    private String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits,  String planKey) throws RepositoryException, IOException, JavaGitException
     {
         log.error("detecting commits for "+lastRevisionChecked);
         GitLog gitLog = new GitLog();
@@ -193,7 +205,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         {
             opt.setOptLimitCommitAfter(true, lastRevisionChecked);
         }
-        List<GitLogResponse.Commit> gitCommits = gitLog.log(getCheckoutDirectory(planKey), opt, Ref.createBranchRef("origin/master"));
+        List<GitLogResponse.Commit> gitCommits = gitLog.log(getCheckoutDirectory(planKey), opt, Ref.createBranchRef("origin/"+remoteBranch));
         if (gitCommits.size() > 1)
         {
             gitCommits.remove(gitCommits.size()-1);
@@ -237,8 +249,8 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return lastRevisionChecked;
     }
 
-    @NotNull
-    public String retrieveSourceCode(@NotNull String planKey, @Nullable String vcsRevisionKey) throws RepositoryException
+    
+    public String retrieveSourceCode( String planKey, String vcsRevisionKey) throws RepositoryException
     {
         log.error("retrieving source code");
         try
@@ -265,14 +277,14 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         GitMerge merge = new GitMerge();
 
         // FIXME: should really only merge to the target revision
-        merge.merge(sourceDir, Ref.createBranchRef("origin/master"));
+        merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
 
         return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), planKey);
     }
 
 
-    @NotNull
-    public ErrorCollection validate(@NotNull BuildConfiguration buildConfiguration)
+    
+    public ErrorCollection validate( BuildConfiguration buildConfiguration)
     {
         ErrorCollection errorCollection = super.validate(buildConfiguration);
 
@@ -285,6 +297,12 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         else
         {
             // FIXME: do validation
+        }
+        
+        String remoBranch = buildConfiguration.getString(GIT_REMOTE_BRANCH);
+        if (StringUtils.isEmpty(remoBranch))
+        {
+            errorCollection.addError(GIT_REMOTE_BRANCH, "Please specify the remote branch that will be checked out");
         }
 
         String webRepoUrl = buildConfiguration.getString(WEB_REPO_URL);
@@ -299,7 +317,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
 
-    public boolean isRepositoryDifferent(@NotNull Repository repository)
+    public boolean isRepositoryDifferent( Repository repository)
     {
         if (repository != null && repository instanceof GitRepository)
         {
@@ -315,7 +333,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-    public void prepareConfigObject(@NotNull BuildConfiguration buildConfiguration)
+    public void prepareConfigObject( BuildConfiguration buildConfiguration)
     {
         String repositoryKey = buildConfiguration.getString(SELECTED_REPOSITORY);
 
@@ -350,12 +368,13 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-    public void populateFromConfig(@NotNull HierarchicalConfiguration config)
+    public void populateFromConfig( HierarchicalConfiguration config)
     {
         super.populateFromConfig(config);
 
         setRepositoryUrl(config.getString(GIT_REPO_URL));
         setUsername(config.getString(GIT_USERNAME));
+        setRemoteBranch(config.getString(GIT_REMOTE_BRANCH));
         setAuthType(config.getString(GIT_AUTHTYPE));
         if (AUTH_SSH.equals(authType))
         {
@@ -375,11 +394,12 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         quietPeriodHelper.populateFromConfig(config, this);
     }
 
-    @NotNull
+    
     public HierarchicalConfiguration toConfiguration()
     {
         HierarchicalConfiguration configuration = super.toConfiguration();
         configuration.setProperty(GIT_REPO_URL, getRepositoryUrl());
+        configuration.setProperty(GIT_REMOTE_BRANCH, getRemoteBranch());
         configuration.setProperty(GIT_USERNAME, getUsername());
         configuration.setProperty(GIT_AUTHTYPE, getAuthType());
         if (AUTH_SSH.equals(authType))
@@ -407,7 +427,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
 
-    public boolean isAdvancedOptionEnabled(@NotNull BuildConfiguration buildConfiguration)
+    public boolean isAdvancedOptionEnabled( BuildConfiguration buildConfiguration)
     {
         final boolean useExternals = buildConfiguration.getBoolean(USE_EXTERNALS, false);
         final boolean quietPeriodEnabled = quietPeriodHelper.isEnabled(buildConfiguration);
@@ -420,7 +440,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      *
      * @return The name
      */
-    @NotNull
+    
     public String getName()
     {
         return NAME;
@@ -518,6 +538,26 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     public String getRepositoryUrl()
     {
         return repositoryUrl;
+    }
+    
+    /**
+     * Specify the subversion repository we are using
+     *
+     * @param remoteBranch The subversion repository
+     */
+    public void setRemoteBranch(String remoteBranch)
+    {
+        this.remoteBranch = StringUtils.trim(remoteBranch);
+    }
+
+    /**
+     * Which repository URL are we using?
+     *
+     * @return The subversion repository
+     */
+    public String getRemoteBranch()
+    {
+        return remoteBranch;
     }
 
 
@@ -646,8 +686,8 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
     @Override
-    @Nullable
-    public String getWebRepositoryUrlForCommit(@NotNull Commit commit)
+    
+    public String getWebRepositoryUrlForCommit( Commit commit)
     {
         ViewCvsFileLinkGenerator fileLinkGenerator = new ViewCvsFileLinkGenerator(webRepositoryUrl);
         return null;// fileLinkGenerator.getWebRepositoryUrlForCommit(commit, webRepositoryUrlRepoName, ViewCvsFileLinkGenerator.GIT_REPO_TYPE);
@@ -655,19 +695,22 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     public String getHost()
     {
-        if (repositoryUrl == null)
-        {
-            return UNKNOWN_HOST;
-        }
-
-        try
-        {
-            URL url = new URL(getSubstitutedRepositoryUrl());
-            return url.getHost();
-        } catch (MalformedURLException e)
-        {
-            return UNKNOWN_HOST;
-        }
+    	return "localhost"; 
+    	// with the code below bamboo says UNKNOWN_HOST and I can't use remote triggers (slnc) 
+    	
+//        if (repositoryUrl == null)
+//        {
+//            return UNKNOWN_HOST;
+//        }
+//
+//        try
+//        {
+//            URL url = new URL(getSubstitutedRepositoryUrl());
+//            return url.getHost();
+//        } catch (MalformedURLException e)
+//        {
+//            return UNKNOWN_HOST;
+//        }
     }
 
     public boolean isQuietPeriodEnabled()

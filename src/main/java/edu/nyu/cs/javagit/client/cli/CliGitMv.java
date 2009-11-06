@@ -27,7 +27,6 @@ import edu.nyu.cs.javagit.api.commands.GitMvOptions;
 import edu.nyu.cs.javagit.api.commands.GitMvResponse;
 import edu.nyu.cs.javagit.client.GitMvResponseImpl;
 import edu.nyu.cs.javagit.client.IGitMv;
-import edu.nyu.cs.javagit.utilities.CheckUtilities;
 import edu.nyu.cs.javagit.utilities.ExceptionMessageMap;
 
 /**

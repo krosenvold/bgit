@@ -1,5 +1,6 @@
 [@ww.textfield labelKey='Repository' name='repository.git.repositoryUrl' required='true' /]
 [@ww.textfield labelKey='Username' name='repository.git.username' /]
+[@ww.textfield labelKey='Remote branch to track' name='repository.git.remoteBranch' required='true' /]
 
 [@ww.select labelKey='Authentication' name='repository.git.authType' toggle='true'
         list='authenticationTypes' listKey='name' listValue='label']

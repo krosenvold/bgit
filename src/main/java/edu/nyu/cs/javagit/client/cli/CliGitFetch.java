@@ -1,16 +1,15 @@
 package edu.nyu.cs.javagit.client.cli;
 
-import edu.nyu.cs.javagit.api.JavaGitConfiguration;
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.CommandResponse;
-import edu.nyu.cs.javagit.client.IGitFetch;
-import edu.nyu.cs.javagit.utilities.CheckUtilities;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.nyu.cs.javagit.api.JavaGitConfiguration;
+import edu.nyu.cs.javagit.api.JavaGitException;
+import edu.nyu.cs.javagit.api.commands.CommandResponse;
+import edu.nyu.cs.javagit.client.IGitFetch;
+import edu.nyu.cs.javagit.utilities.CheckUtilities;
 
 public class CliGitFetch implements IGitFetch
 {

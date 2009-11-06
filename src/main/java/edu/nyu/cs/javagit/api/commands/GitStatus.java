@@ -20,13 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import edu.nyu.cs.javagit.api.GitFileSystemObject;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.client.ClientManager;
 import edu.nyu.cs.javagit.client.IClient;
 import edu.nyu.cs.javagit.client.IGitStatus;
 import edu.nyu.cs.javagit.utilities.CheckUtilities;
-import edu.nyu.cs.javagit.api.GitFileSystemObject;
-import edu.nyu.cs.javagit.api.GitFileSystemObject.Status;
 
 /**
  * <code>GitStatus</code> provides an API to status of a git repository.

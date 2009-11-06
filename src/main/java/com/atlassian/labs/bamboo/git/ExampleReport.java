@@ -1,9 +1,11 @@
 package com.atlassian.labs.bamboo.git;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
-import com.atlassian.bamboo.reports.collector.*;
 import org.jfree.data.general.Dataset;
+
+import com.atlassian.bamboo.reports.collector.ReportCollector;
 
 /**
  * A basic report.

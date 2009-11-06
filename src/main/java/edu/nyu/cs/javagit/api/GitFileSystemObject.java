@@ -18,10 +18,9 @@ package edu.nyu.cs.javagit.api;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-import edu.nyu.cs.javagit.api.WorkingTree;
 import edu.nyu.cs.javagit.api.commands.GitAdd;
 import edu.nyu.cs.javagit.api.commands.GitAddResponse;
 import edu.nyu.cs.javagit.api.commands.GitCommit;

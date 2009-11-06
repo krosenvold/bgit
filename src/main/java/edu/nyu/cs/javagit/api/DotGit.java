@@ -16,16 +16,21 @@
  */
 package edu.nyu.cs.javagit.api;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.io.File;
-import java.io.IOException;
-import edu.nyu.cs.javagit.utilities.CheckUtilities;
 
-import edu.nyu.cs.javagit.api.commands.*;
+import edu.nyu.cs.javagit.api.commands.GitBranch;
+import edu.nyu.cs.javagit.api.commands.GitBranchOptions;
+import edu.nyu.cs.javagit.api.commands.GitBranchResponse;
+import edu.nyu.cs.javagit.api.commands.GitInit;
+import edu.nyu.cs.javagit.api.commands.GitLog;
+import edu.nyu.cs.javagit.api.commands.GitLogOptions;
 import edu.nyu.cs.javagit.api.commands.GitLogResponse.Commit;
+import edu.nyu.cs.javagit.utilities.CheckUtilities;
 
 /**
  * The <code>DotGit</code> represents the .git directory.

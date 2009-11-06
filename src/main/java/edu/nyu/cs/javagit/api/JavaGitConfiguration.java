@@ -2,14 +2,14 @@ package edu.nyu.cs.javagit.api;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.nyu.cs.javagit.api.commands.CommandResponse;
 import edu.nyu.cs.javagit.client.cli.IParser;
 import edu.nyu.cs.javagit.client.cli.ProcessUtilities;
-import edu.nyu.cs.javagit.utilities.ExceptionMessageMap;
 import edu.nyu.cs.javagit.utilities.CheckUtilities;
+import edu.nyu.cs.javagit.utilities.ExceptionMessageMap;
 
 /**
  * This class encapsulates our global API options that client code may want to get or set.

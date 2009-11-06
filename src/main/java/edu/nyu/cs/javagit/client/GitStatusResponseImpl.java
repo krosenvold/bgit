@@ -19,8 +19,8 @@ package edu.nyu.cs.javagit.client;
 import java.io.File;
 
 import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.GitStatusResponse;
 import edu.nyu.cs.javagit.api.GitFileSystemObject.Status;
+import edu.nyu.cs.javagit.api.commands.GitStatusResponse;
 
 /**
  * Implementation of a <code>GitStatusResponse</code>. This class adds functionality to set

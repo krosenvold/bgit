@@ -1,15 +1,14 @@
 package edu.nyu.cs.javagit.api.commands;
 
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.utilities.CheckUtilities;
-import edu.nyu.cs.javagit.client.IClient;
-import edu.nyu.cs.javagit.client.ClientManager;
-import edu.nyu.cs.javagit.client.IGitInit;
-import edu.nyu.cs.javagit.client.IGitMerge;
-
 import java.io.File;
 import java.io.IOException;
+
+import edu.nyu.cs.javagit.api.JavaGitException;
+import edu.nyu.cs.javagit.api.Ref;
+import edu.nyu.cs.javagit.client.ClientManager;
+import edu.nyu.cs.javagit.client.IClient;
+import edu.nyu.cs.javagit.client.IGitMerge;
+import edu.nyu.cs.javagit.utilities.CheckUtilities;
 
 public class GitMerge
 {

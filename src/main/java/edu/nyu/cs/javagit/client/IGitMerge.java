@@ -1,11 +1,10 @@
 package edu.nyu.cs.javagit.client;
 
-import edu.nyu.cs.javagit.api.commands.GitInitResponse;
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-
 import java.io.File;
 import java.io.IOException;
+
+import edu.nyu.cs.javagit.api.JavaGitException;
+import edu.nyu.cs.javagit.api.Ref;
 
 public interface IGitMerge
 {

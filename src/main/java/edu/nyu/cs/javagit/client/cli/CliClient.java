@@ -16,7 +16,24 @@
  */
 package edu.nyu.cs.javagit.client.cli;
 
-import edu.nyu.cs.javagit.client.*;
+import edu.nyu.cs.javagit.client.IClient;
+import edu.nyu.cs.javagit.client.IGitAdd;
+import edu.nyu.cs.javagit.client.IGitBranch;
+import edu.nyu.cs.javagit.client.IGitCheckout;
+import edu.nyu.cs.javagit.client.IGitClone;
+import edu.nyu.cs.javagit.client.IGitCommit;
+import edu.nyu.cs.javagit.client.IGitDiff;
+import edu.nyu.cs.javagit.client.IGitGrep;
+import edu.nyu.cs.javagit.client.IGitInit;
+import edu.nyu.cs.javagit.client.IGitLog;
+import edu.nyu.cs.javagit.client.IGitMerge;
+import edu.nyu.cs.javagit.client.IGitMv;
+import edu.nyu.cs.javagit.client.IGitRemote;
+import edu.nyu.cs.javagit.client.IGitReset;
+import edu.nyu.cs.javagit.client.IGitRevert;
+import edu.nyu.cs.javagit.client.IGitRm;
+import edu.nyu.cs.javagit.client.IGitShow;
+import edu.nyu.cs.javagit.client.IGitStatus;
 
 /**
  * Command-line implementation of the <code>IClient</code> interface.
