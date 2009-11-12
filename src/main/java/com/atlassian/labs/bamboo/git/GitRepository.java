@@ -1,13 +1,25 @@
 package com.atlassian.labs.bamboo.git;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.atlassian.bamboo.author.Author;
+import com.atlassian.bamboo.author.AuthorImpl;
+import com.atlassian.bamboo.commit.Commit;
+import com.atlassian.bamboo.commit.CommitFile;
+import com.atlassian.bamboo.commit.CommitFileImpl;
+import com.atlassian.bamboo.commit.CommitImpl;
+import com.atlassian.bamboo.repository.*;
+import com.atlassian.bamboo.utils.ConfigUtils;
+import com.atlassian.bamboo.utils.error.ErrorCollection;
+import com.atlassian.bamboo.v2.build.BuildChanges;
+import com.atlassian.bamboo.v2.build.BuildChangesImpl;
+import com.atlassian.bamboo.v2.build.BuildContext;
+import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
+import com.opensymphony.util.UrlUtils;
+import edu.nyu.cs.javagit.api.JavaGitException;
+import edu.nyu.cs.javagit.api.Ref;
+import edu.nyu.cs.javagit.api.commands.*;
+import edu.nyu.cs.javagit.client.cli.CliGitClone;
+import edu.nyu.cs.javagit.client.cli.CliGitFetch;
+import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -17,33 +29,9 @@ import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.atlassian.bamboo.author.Author;
-import com.atlassian.bamboo.author.AuthorImpl;
-import com.atlassian.bamboo.commit.Commit;
-import com.atlassian.bamboo.commit.CommitFile;
-import com.atlassian.bamboo.commit.CommitFileImpl;
-import com.atlassian.bamboo.commit.CommitImpl;
-import com.atlassian.bamboo.repository.AbstractRepository;
-import com.atlassian.bamboo.repository.InitialBuildAwareRepository;
-import com.atlassian.bamboo.repository.MutableQuietPeriodAwareRepository;
-import com.atlassian.bamboo.repository.QuietPeriodHelper;
-import com.atlassian.bamboo.repository.Repository;
-import com.atlassian.bamboo.repository.RepositoryException;
-import com.atlassian.bamboo.repository.WebRepositoryEnabledRepository;
-import com.atlassian.bamboo.utils.ConfigUtils;
-import com.atlassian.bamboo.utils.error.ErrorCollection;
-import com.atlassian.bamboo.v2.build.BuildChanges;
-import com.atlassian.bamboo.v2.build.BuildChangesImpl;
-import com.atlassian.bamboo.v2.build.BuildContext;
-import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
-import com.opensymphony.util.UrlUtils;
-
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.*;
-import edu.nyu.cs.javagit.client.cli.CliGitClone;
-import edu.nyu.cs.javagit.client.cli.CliGitFetch;
-import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class GitRepository extends AbstractRepository implements WebRepositoryEnabledRepository, InitialBuildAwareRepository, MutableQuietPeriodAwareRepository
 {
@@ -79,8 +67,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     private int quietPeriod = QuietPeriodHelper.DEFAULT_QUIET_PERIOD;
     private int maxRetries = QuietPeriodHelper.DEFAULT_MAX_RETRIES;
     private static final long serialVersionUID = -5031786714275269805L;
-    private static final File cwdFile = new File(".");
-
 
     public GitRepository() {
     }
@@ -103,7 +89,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         try
         {
 
-            String repositoryUrl = getSubstitutedRepositoryUrl();
+            getSubstitutedRepositoryUrl();
 
             File sourceDir = getCheckoutDirectory(planKey);    //  Project/checkout is value
 
@@ -151,7 +137,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         log.debug("retrieving source code");
         try
         {
-                String repositoryUrl = getSubstitutedRepositoryUrl();
+                getSubstitutedRepositoryUrl();
                 File sourceDir = getCheckoutDirectory(planKey); // sourceedir = xxx/checkout
                 cloneOrFetch(sourceDir);
                 submodule_update(sourceDir);
@@ -232,6 +218,13 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
                         files.add(commitFile);
                     }
                 }
+                if ( files.size() == 0)  { // No files, add a dummy file to keep version number
+                     CommitFileImpl commitFile = new CommitFileImpl();
+                     commitFile.setName(".");
+                     commitFile.setRevision(logEntry.getSha());
+                     files.add(commitFile);
+                 }
+                 
                 commit.setFiles(files);
 
                 commits.add(commit);
@@ -363,6 +356,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     void clone(File sourceDir, GitCloneOptions gitCloneOptions) throws IOException, JavaGitException {
         clone( repositoryUrl, sourceDir, gitCloneOptions);
     }
+    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     static void clone(String repositoryUrl, File sourceDir, GitCloneOptions gitCloneOptions) throws IOException, JavaGitException {
         ensureDirExists( sourceDir);
         CliGitClone clone = new CliGitClone();
@@ -372,7 +366,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         String checkoutDir = sourceDir.getPath().substring( parentDirS.length() + 1);
         if (gitCloneOptions == null)
             gitCloneOptions = new GitCloneOptions();
-        clone.clone(parentDir, repositoryUrl, new File(checkoutDir));
+        clone.clone(parentDir, gitCloneOptions, repositoryUrl, new File(checkoutDir));
     }
 
     static void ensureDirExists(File dir) {
