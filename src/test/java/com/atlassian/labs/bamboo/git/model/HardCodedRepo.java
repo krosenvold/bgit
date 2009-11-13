@@ -13,10 +13,10 @@ public class HardCodedRepo {
     public static final CommitDescriptor COMMIT_3a45 =  new CommitDescriptor(new Sha("3a450411d6868221ae290bc0c17695de2990d5d8"), "File4.txt", "Fri Oct 30 11:32:51 2009 +0000", "Fri Oct 30 11:33:53 2009 +0000", COMMIT_2d9b);
     public static final CommitDescriptor COMMIT_fb65 =  new CommitDescriptor(new Sha("fb6562c90de470294b879655a14640ab454ff2ae"), "File5.txt", "Fri Oct 30 11:31:19 2009 +0000", "Fri Oct 30 11:33:53 2009 +0000",  COMMIT_3a45);
     public static final CommitDescriptor COMMIT_5f10 =  new CommitDescriptor(new Sha("5f100f52d0fb2997e50526b4b68d425c69836bdd"), "MergeBranchFile.txt", "Thu Nov 12 21:27:23 2009 +0100", "Thu Nov 12 21:27:23 2009 +0100", second_a55e);
-    public static final CommitDescriptor COMMIT_8_aBranch2 =  new CommitDescriptor(new Sha("281338e6d30d98808e23dc71af487d7b6c3fefc8"), "MergeBranchFile2.txt", "Thu Nov 12 21:28:43 2009 +0100", "Thu Nov 12 21:28:43 2009 +0100", COMMIT_5f10);
-    public static final CommitDescriptor COMMIT_8_featureDefault1 =  new CommitDescriptor(new Sha("7594c745d20989b4dbdada6a0c1f8a27d8e3660a"), "AIntertwinedFiledDateWise.txt", "Thu Nov 12 21:29:13 2009 +0100", "Thu Nov 12 21:29:13 2009 +0100", COMMIT_fb65);
-    public static final CommitDescriptor COMMIT_8_aBranch3 =  new CommitDescriptor(new Sha("4208d196d885a8a09bc346999aa7a087ff150fb0"), "MergeBranchFile3.txt", "Thu Nov 12 21:29:46 2009 +0100", "Thu Nov 12 21:29:46 2009 +0100", COMMIT_8_aBranch2);
-    public static final CommitDescriptor COMMIT_Merge_aBranch_featureDefault =  new CommitDescriptor(new Sha("34a1c949e2d7e9f138f0fab2c0829c2a134c21a3"), null, "Thu Nov 12 21:30:06 2009 +0100", "Thu Nov 12 21:30:06 2009 +0100", COMMIT_8_featureDefault1, COMMIT_8_aBranch3);
+    public static final CommitDescriptor COMMIT_2813 =  new CommitDescriptor(new Sha("281338e6d30d98808e23dc71af487d7b6c3fefc8"), "MergeBranchFile2.txt", "Thu Nov 12 21:28:43 2009 +0100", "Thu Nov 12 21:28:43 2009 +0100", COMMIT_5f10);
+    public static final CommitDescriptor COMMIT_7594_Intertwined =  new CommitDescriptor(new Sha("7594c745d20989b4dbdada6a0c1f8a27d8e3660a"), "AIntertwinedFiledDateWise.txt", "Thu Nov 12 21:29:13 2009 +0100", "Thu Nov 12 21:29:13 2009 +0100", COMMIT_fb65);
+    public static final CommitDescriptor COMMIT_4208 =  new CommitDescriptor(new Sha("4208d196d885a8a09bc346999aa7a087ff150fb0"), "MergeBranchFile3.txt", "Thu Nov 12 21:29:46 2009 +0100", "Thu Nov 12 21:29:46 2009 +0100", COMMIT_2813);
+    public static final CommitDescriptor COMMIT_Merge_aBranch_featureDefault =  new CommitDescriptor(new Sha("34a1c949e2d7e9f138f0fab2c0829c2a134c21a3"), null, "Thu Nov 12 21:30:06 2009 +0100", "Thu Nov 12 21:30:06 2009 +0100", COMMIT_7594_Intertwined, COMMIT_4208);
 
     public static CommitDescriptor getRepoTip(){
         return COMMIT_Merge_aBranch_featureDefault;

@@ -17,7 +17,7 @@ public class TestModelTest {
     @Test
     public void testCollectorSimpleLinar(){
         final CommitDescriptor commitDescriptor = HardCodedRepo.getRepoTip();
-        List<CommitDescriptor> result = commitDescriptor.collectNodes( HardCodedRepo.COMMIT_8_aBranch2.getSha());
+        List<CommitDescriptor> result = commitDescriptor.collectNodes( HardCodedRepo.COMMIT_2813.getSha());
         assertEquals(2, result.size());
     }
 
@@ -31,12 +31,12 @@ public class TestModelTest {
     @Test
     public void testTimeOrder(){
         final CommitDescriptor commitDescriptor = HardCodedRepo.getRepoTip();
-        CommitList result = commitDescriptor.collectNodesInGitLogOrder( HardCodedRepo.second_a55e.getSha());
+        CommitList result = commitDescriptor.collectNodesInRealGitLogOrder( HardCodedRepo.second_a55e.getSha());
         Iterator<CommitDescriptor> iter = result.iterator();
         assertEquals( HardCodedRepo.COMMIT_Merge_aBranch_featureDefault, iter.next());
-        assertEquals( HardCodedRepo.COMMIT_8_aBranch3, iter.next() );
-        assertEquals( HardCodedRepo.COMMIT_8_featureDefault1, iter.next() );
-        assertEquals( HardCodedRepo.COMMIT_8_aBranch2, iter.next() );
+        assertEquals( HardCodedRepo.COMMIT_4208, iter.next() );
+        assertEquals( HardCodedRepo.COMMIT_7594_Intertwined, iter.next() );
+        assertEquals( HardCodedRepo.COMMIT_2813, iter.next() );
         assertEquals( HardCodedRepo.COMMIT_5f10, iter.next() );
         assertEquals( HardCodedRepo.COMMIT_fb65, iter.next() );
         assertEquals( HardCodedRepo.COMMIT_3a45, iter.next() );
@@ -44,6 +44,19 @@ public class TestModelTest {
         assertFalse( iter.hasNext());
     }
 
+    @Test
+    public void testSkewedTimeOrder(){
+        final CommitDescriptor commitDescriptor = HardCodedRepo.getRepoTip();
+        CommitList result = commitDescriptor.collectNodesInRealGitLogOrder( HardCodedRepo.COMMIT_3a45.getSha());
+        Iterator<CommitDescriptor> iter = result.iterator();
+        assertEquals( HardCodedRepo.COMMIT_Merge_aBranch_featureDefault, iter.next());
+        assertEquals( HardCodedRepo.COMMIT_4208, iter.next() );
+        assertEquals( HardCodedRepo.COMMIT_7594_Intertwined, iter.next() );
+        assertEquals( HardCodedRepo.COMMIT_2813, iter.next() );
+        assertEquals( HardCodedRepo.COMMIT_5f10, iter.next() );
+        assertEquals( HardCodedRepo.COMMIT_fb65, iter.next() );
+        assertFalse( iter.hasNext());
+    }
 
 }
 

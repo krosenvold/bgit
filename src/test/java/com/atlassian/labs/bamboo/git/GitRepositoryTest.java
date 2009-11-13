@@ -91,7 +91,7 @@ public class GitRepositoryTest
         final CommitDescriptor commitDescriptor = HardCodedRepo.getBranchPointerFeatureDefault();
 
 
-        System.out.println("commitDescriptor = " + commitDescriptor.collectNodesInGitLogOrder(HardCodedRepo.first.getSha()).toString());
+        System.out.println("commitDescriptor = " + commitDescriptor.collectNodesInRealGitLogOrder(HardCodedRepo.first.getSha()).toString());
         commitDescriptor.assertHistoryMatch( results, HardCodedRepo.first.getSha());
     }
 
@@ -138,17 +138,16 @@ public class GitRepositoryTest
         gitRepository.detectCommitsForUrl(HardCodedRepo.COMMIT_fb65.getSha().getSha(), results, sourceDir, "UT-KEY");
         assertEquals(5, results.size());
 
-        // These to tests fail because the test-data representation is still not correct. Git limits found commits by the date of the supplied sha.
-/*        results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(TestModel.COMMIT_2d9b.getSha().getSha()  , results, sourceDir, "UT-KEY");
-        TestModel.getBranchPointerFeatureDefault().assertHistoryMatch( results, TestModel.COMMIT_2d9b.getSha());
-
-
         results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(TestModel.COMMIT_3a45.getSha().getSha(), results, sourceDir, "UT-KEY");
-        TestModel.getBranchPointerFeatureDefault().assertHistoryMatch( results, TestModel.COMMIT_3a45.getSha());
-  */
+        gitRepository.detectCommitsForUrl(HardCodedRepo.COMMIT_2d9b.getSha().getSha()  , results, sourceDir, "UT-KEY");
+        HardCodedRepo.getBranchPointerFeatureDefault().assertHistoryMatch( results, HardCodedRepo.COMMIT_2d9b.getSha());
 
+
+        // This tes fails because the test-data representation is still not correct.
+        // Method collectNodesInRealGitLogOrder does not do it properly -- yet. Need to check both date and sha1
+        results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(HardCodedRepo.COMMIT_3a45.getSha().getSha(), results, sourceDir, "UT-KEY");
+        HardCodedRepo.getBranchPointerFeatureDefault().assertHistoryMatch( results, HardCodedRepo.COMMIT_3a45.getSha());
     }
 
     @Test

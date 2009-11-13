@@ -18,6 +18,7 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
     private final Sha sha;
     private final String expectedFile;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private final Calendar authorDate;
     private final Calendar commitDate;
     private final List<CommitDescriptor> parents;
@@ -44,6 +45,11 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
         this.parents = Arrays.asList( parents);
     }
 
+    public Calendar getCommitDate() {
+        return commitDate;
+    }
+
+
     public Sha getSha() {
         return sha;
     }
@@ -61,10 +67,19 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
         return false;
     }
 
+    public CommitDescriptor getAncestor(Sha sha){
+        if (isThis( sha)) return this;
+        for (CommitDescriptor commitDescriptor : parents){
+            final CommitDescriptor commitDescriptor1 = commitDescriptor.getAncestor(sha);
+            if (commitDescriptor1 != null) return commitDescriptor1;
+        }
+        return null;
+    }
+
     /**
      * Returns true if and only if this node is a true descendant of sha.
-     * @param sha
-     * @return
+     * @param sha The sha of the parent
+     * @return true if it is a descendant
      */
     public boolean isDescendantOf(Sha sha){
         return (historyContains( sha) && !isThis( sha));
@@ -72,8 +87,8 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
 
     /**
      * Collects all nodes up to (but not including) the supplied sha
-     * @param sha
-     * @return
+     * @param sha collects nodes
+     * @return The commit descriptos
      */
     public List<CommitDescriptor> collectNodes(Sha sha){
         Set<CommitDescriptor> result = new HashSet<CommitDescriptor>();
@@ -81,15 +96,22 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
         return new ArrayList<CommitDescriptor>(result);
     }
 
-    public CommitList collectNodesInGitLogOrder(Sha sha){
-        final List<CommitDescriptor> commitDescriptors = collectNodes(sha);
-        SortedSet<CommitDescriptor> sorted = new TreeSet<CommitDescriptor>(commitDescriptors);
+    public List<CommitDescriptor> collectNodesByDate(Calendar targetCommitDate, Sha sha){
+        Set<CommitDescriptor> result = new HashSet<CommitDescriptor>();
+        collectNodes( targetCommitDate, sha, result);
+        return new ArrayList<CommitDescriptor>(result);
+    }
+
+    public CommitList collectNodesInRealGitLogOrder(Sha sha){
+        final CommitDescriptor descriptor = getAncestor(sha);
+        final Calendar targetCommitDate = descriptor.getCommitDate();
+        final List<CommitDescriptor> commitDescriptors1 = collectNodesByDate(targetCommitDate, sha);
+        SortedSet<CommitDescriptor> sorted = new TreeSet<CommitDescriptor>(commitDescriptors1);
         final ArrayList<CommitDescriptor> result = new ArrayList<CommitDescriptor>(sorted);
         Collections.reverse( result);
         return new CommitList(result);
 
     }
-
 
      void collectionNodes(Sha sha, Set<CommitDescriptor> result){
         if (isDescendantOf( sha))
@@ -101,27 +123,23 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
         }
     }
 
-    public void assertMatch(com.atlassian.bamboo.commit.Commit commit, int pos){
-        final CommitFile commitFile = getCommitFile(commit, expectedFile);
-        assertEquals("Sha match not in " + pos,  sha.getSha(), commitFile.getRevision());
-    }
+    void collectNodes(Calendar date, Sha sha, Set<CommitDescriptor> result){
+        if ( this.getCommitDate().compareTo( date) >= 0){
+               if (!isThis(sha)) result.add( this);
+               for (CommitDescriptor commitDescriptor : parents){
+                   commitDescriptor.collectNodes( date, sha, result);
+               }
+       }
+   }
+
 
     public void assertMatch(com.atlassian.bamboo.commit.Commit commit){
         final CommitFile commitFile = getAnyFileInCommit(commit);
         assertEquals("Sha match not " ,  sha.getSha(), commitFile.getRevision());
     }
 
-    private CommitFile getCommitFile(Commit commit, String file){
-        for (CommitFile commitFile : commit.getFiles()){
-            if (commitFile.getName().equals( file))
-                return commitFile;
-        }
-        throw new IllegalStateException("Expected to find file" + file + " in pos");
-    }
     private CommitFile getAnyFileInCommit(Commit commit){
-        for (CommitFile commitFile : commit.getFiles()){
-                return commitFile;
-        }
+        if (commit.getFiles().size() > 0) return commit.getFiles().get(0);
         throw new IllegalStateException("No files in commit");
     }
 
@@ -134,7 +152,7 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
     }
 
     public void assertHistoryMatch(List<com.atlassian.bamboo.commit.Commit> commits, Sha until){
-        final CommitList expectedCollection = collectNodesInGitLogOrder(until);
+        final CommitList expectedCollection = collectNodesInRealGitLogOrder(until);
         Iterator<CommitDescriptor> expectedHistory = expectedCollection.iterator();
         Iterator<com.atlassian.bamboo.commit.Commit> bambooCommits = commits.iterator();
 
@@ -147,12 +165,9 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
             final Commit commit = bambooCommits.next();
             expected.assertMatch( commit);
         }
-        for (com.atlassian.bamboo.commit.Commit commit : commits){
-            
-        }
-        
     }
 
+    @SuppressWarnings({"RedundantIfStatement"})
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
