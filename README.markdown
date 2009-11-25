@@ -1,6 +1,6 @@
 <h1>Bamboo Git Plugin</h1>
 
-This plugin provides Git support to the excellent Atlassian Bamboo continou integration server.
+This plugin provides Git support to the excellent Atlassian Bamboo continous integration server.
 
 It is compatible with Bamboo 2.2.x and above.
 
@@ -8,6 +8,15 @@ It is compatible with Bamboo 2.2.x and above.
 <h2>RELEASES</h2>
 
 The current release is 1.1.5. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.5.jar">download</a>. Older releases will have to be built from source, which is really easy:
+
+<h3>Branch/Release policy</h3>
+
+Normally there will be a new binary release every time anything significant changes in
+the plugin. Recent activity has mostly been focussed on improving test quality, hence there may be commits
+on "master" that are unreleased. "master" always contains the lastest version.
+
+Rebasing *may* happen on non-master branches, master will not be rebased. (I did some rebasing when I took
+over maintaining the project)
 
 <h2>HOW TO BUILD FROM SOURCE</h2>
 
