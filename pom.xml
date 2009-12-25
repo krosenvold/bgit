@@ -95,12 +95,12 @@
         <dependency>
             <groupId>com.atlassian.bamboo</groupId>
             <artifactId>atlassian-bamboo-api</artifactId>
-            <version>2.2</version>
+            <version>${atlassian.product.version}</version>
         </dependency>
         <dependency>
             <groupId>com.atlassian.bamboo</groupId>
             <artifactId>atlassian-bamboo-core</artifactId>
-            <version>2.2</version>
+            <version>${atlassian.product.version}</version>
         </dependency>
         <dependency>
             <artifactId>junit</artifactId>
@@ -118,7 +118,7 @@
 
     <properties>
         <atlassian.plugin.key>com.atlassian.labs.bamboo.git.git-plugin</atlassian.plugin.key>
-        <atlassian.product.version>2.2</atlassian.product.version>
+        <atlassian.product.version>2.4</atlassian.product.version>
         <jdkLevel>1.5</jdkLevel>
     </properties>
 </project>
