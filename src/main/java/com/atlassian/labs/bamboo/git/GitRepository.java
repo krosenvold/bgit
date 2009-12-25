@@ -443,7 +443,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             return !new EqualsBuilder()
                     .append(this.getName(), existing.getName())
                     .append(this.getRepositoryUrl(), existing.getRepositoryUrl())
-                    .append(this.getRemoteBranch(), existing.getRemoteBranch())
                     .isEquals();
         }
         else
