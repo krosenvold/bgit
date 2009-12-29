@@ -330,10 +330,10 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             fetch.fetch(sourceDir);
             log.debug("fetch complete");
 
-            log.debug("doing merge");
-            GitMerge merge = new GitMerge();
-            // FIXME: should really only merge to the target revision
-            merge.merge(sourceDir, branchWithOriginPrefix);
+            GitCheckout checkout = new GitCheckout();
+            log.debug("doing checkout");
+            checkout.checkout(sourceDir, new GitCheckoutOptions(), branchWithOriginPrefix);
+            log.debug("checkout complete");
         } else {
             log.debug("no repo found, creating");
             clone(repositoryUrl, sourceDir, null);
