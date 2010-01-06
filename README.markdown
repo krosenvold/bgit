@@ -2,12 +2,12 @@
 
 This plugin provides Git support to the excellent Atlassian Bamboo continous integration server.
 
-It is compatible with Bamboo 2.2.x and above.
+It is compatible with Bamboo 2.2.x and above, including 2.5.
 
     
 <h2>RELEASES</h2>
 
-The current release is 1.1.6. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.6.jar">download</a>. Older releases will have to be built from source, which is really easy:
+The current release is 1.1.7. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.7.jar">download</a>. Older releases will have to be built from source, which is really easy:
 
 <h3>Branch/Release policy</h3>
 
@@ -49,6 +49,10 @@ background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
 <h2>Release notes</h2>
+1.1.7 RELEASE NOTES
+Thanks to Benjamin Reed (RangerRick)
+Switched to bamboo 2.5 libs, bamboo 2.5 compatible. Still works on 2.4.x.
+
 1.1.6 RELEASE NOTES
 All changes thanks to Ivan Sungurov (isungurov)
 
@@ -98,6 +102,8 @@ CHANGELOG
 - Graeme Mathieson (git submodule support)
 - Kristian Rosenvold (several fixes)
 - Alex Fisher (Rebasing fix)
+- Ivan Sungurov (isungurov)
+- Benjamin Reed (RangerRick)
 
 <h2>Related links</h2>
 <ul>
