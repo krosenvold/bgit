@@ -7,7 +7,7 @@ It is compatible with Bamboo 2.2.x and above.
     
 <h2>RELEASES</h2>
 
-The current release is 1.1.5. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.5.jar">download</a>. Older releases will have to be built from source, which is really easy:
+The current release is 1.1.6. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.6.jar">download</a>. Older releases will have to be built from source, which is really easy:
 
 <h3>Branch/Release policy</h3>
 
@@ -49,6 +49,13 @@ background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
 <h2>Release notes</h2>
+1.1.6 RELEASE NOTES
+All changes thanks to Ivan Sungurov (isungurov)
+
+- Does not re-clone repository when switching branch
+- Internal change to use checkout instead of merge upon update. May improve rebasing..
+- Updated to 2.4 libs. Probably still runs on older versions.
+
 1.1.5 RELEASE NOTES
 
 - Fixed problem with rebased repos where out-of order dates would cause bamboo
