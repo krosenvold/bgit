@@ -4,6 +4,7 @@ This plugin provides Git support to the excellent Atlassian Bamboo continous int
 
 It is compatible with Bamboo 2.2.x and above, including 2.5.
 
+It also works on Windows, but requires cygwin git (not msysgit).
     
 <h2>RELEASES</h2>
 
@@ -49,6 +50,10 @@ background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
 <h2>Release notes</h2>
+1.1.8 RELEASE NOTES
+
+Fixed regression introduced with checkout logic in 1.1.6
+
 1.1.7 RELEASE NOTES
 Thanks to Benjamin Reed (RangerRick)
 Switched to bamboo 2.5 libs, bamboo 2.5 compatible. Still works on 2.4.x.
