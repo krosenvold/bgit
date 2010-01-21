@@ -181,7 +181,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
 
         opt.setOptFileDetails(true);
-        List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/"+remoteBranch));
+        List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt);
         if (gitCommits.size() > 0)
         {
             log.debug("commits found:"+gitCommits.size());

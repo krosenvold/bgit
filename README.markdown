@@ -8,7 +8,7 @@ It also works on Windows, but requires cygwin git (not msysgit).
     
 <h2>RELEASES</h2>
 
-The current release is 1.1.7. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.7.jar">download</a>. Older releases will have to be built from source, which is really easy:
+The current release is 1.1.9. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.9.jar">download</a>. Older releases will have to be built from source, which is really easy:
 
 <h3>Branch/Release policy</h3>
 
