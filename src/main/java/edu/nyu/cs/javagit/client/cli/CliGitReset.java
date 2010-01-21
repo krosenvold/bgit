@@ -43,7 +43,7 @@ public class CliGitReset implements IGitReset {
 
   public GitResetResponse gitReset(File repository, GitResetOptions options) throws IOException,
       JavaGitException {
-    return resetProcessor(repository, new GitResetOptions(), null);
+    return resetProcessor(repository, options, null);
   }
 
   public GitResetResponse gitReset(File repository, Ref commitName, List<File> paths)

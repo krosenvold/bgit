@@ -2,6 +2,7 @@ package com.atlassian.labs.bamboo.git;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Array;
 import java.util.*;
 
 import com.atlassian.labs.bamboo.git.model.CommitDescriptor;
@@ -9,7 +10,13 @@ import com.atlassian.labs.bamboo.git.model.HardCodedRepo;
 import com.atlassian.labs.bamboo.git.model.Sha;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
+import edu.nyu.cs.javagit.api.commands.CommandResponse;
 import edu.nyu.cs.javagit.api.commands.GitCloneOptions;
+import edu.nyu.cs.javagit.api.commands.GitReset;
+import edu.nyu.cs.javagit.api.commands.GitResetOptions;
+import edu.nyu.cs.javagit.client.GitResetResponseImpl;
+import edu.nyu.cs.javagit.client.cli.IParser;
+import edu.nyu.cs.javagit.client.cli.ProcessUtilities;
 import org.junit.Test;
 import org.junit.BeforeClass;
 import org.junit.After;
@@ -54,6 +61,88 @@ public class GitRepositoryTest
         gitRepository.cloneOrFetch(sourceDir);
         assertTrue( GitRepository.containsValidRepo( sourceDir));
 
+        assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
+    }
+
+    @Test
+    public void testCloneThenMoveHeadThenFetch() throws IOException, JavaGitException {
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
+
+        assertFalse( GitRepository.containsValidRepo( sourceDir));
+        gitRepository.cloneOrFetch(sourceDir);
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
+
+        assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
+
+
+        GitResetOptions gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, HardCodedRepo.second_a55e.getShaRef());
+        GitReset.gitReset( sourceDir, gitResetOptions);
+
+        gitRepository.cloneOrFetch(sourceDir);
+        final Ref ref = gitRepository.gitStatus(sourceDir);
+        assertEquals("Repository should be on feature1 branch", "feature1", ref.getName());
+    }
+
+
+    @Test
+    public void testCloneThenRebaseLocal() throws IOException, JavaGitException {
+        // Rebasing local branch should be more or less equivalent to rebasing remote branch.
+        // Oops. Brain damaged git repo does not support rebase.
+
+
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
+
+        assertFalse( GitRepository.containsValidRepo( sourceDir));
+        gitRepository.cloneOrFetch(sourceDir);
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
+
+        IParser rebaseParser = new IParser(){
+            public void parseLine(String line) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void processExitCode(int code) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public CommandResponse getResponse() throws JavaGitException {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+        };
+
+        List<String> commandLine = Arrays.asList( "git","rebase", "origin/feature2");
+
+        CommandResponse rebase = ProcessUtilities.runCommand(sourceDir, commandLine, rebaseParser);
+
+
+        // Todo: Need to assert the head points to a given commit.
+        assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
+
+        gitRepository.cloneOrFetch(sourceDir);
+        final Ref ref = gitRepository.gitStatus(sourceDir);
+        assertEquals("Repository should be on feature1 branch", "feature1", ref.getName());
+    }
+
+    @Test
+    public void testCloneThenSeveralBranchChanges() throws IOException, JavaGitException {
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
+
+        assertFalse( GitRepository.containsValidRepo( sourceDir));
+        gitRepository.cloneOrFetch(sourceDir);
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
+
+        assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
+
+        gitRepository.setRemoteBranch("aBranch");
+        gitRepository.cloneOrFetch(sourceDir);
+        assertEquals("Repository should be on feature1 branch", "aBranch", gitRepository.gitStatus(sourceDir).getName());
+
+        // Switch back to
+        gitRepository.setRemoteBranch("feature1");
+        gitRepository.cloneOrFetch(sourceDir);
         assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
     }
 

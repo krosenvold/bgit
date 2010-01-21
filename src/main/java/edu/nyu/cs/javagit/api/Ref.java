@@ -316,6 +316,15 @@ public class Ref {
       return true;
     }
 
+    public boolean isExactMatch(Ref other) {
+
+      if (!CheckUtilities.checkObjectsEqual(refType, other.getRefType())) {
+        return false;
+      }
+
+      return  name.equals( other.getName());
+    }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Ref)) {

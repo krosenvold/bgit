@@ -50,6 +50,14 @@ background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
 <h2>Release notes</h2>
+1.1.9 RELEASE NOTES
+
+- This version includes greatly improved checkout/fetch/update algorithm that should also handle rebases
+  fairly well. Change detection upon rebase is still somewhat in the blue - it shouldn't crash but it won't give
+  too much valuable information either. That's what you get for messing with history.
+   
+
+
 1.1.8 RELEASE NOTES
 
 Fixed regression introduced with checkout logic in 1.1.6

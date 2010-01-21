@@ -13,7 +13,6 @@ import com.atlassian.bamboo.v2.build.BuildChanges;
 import com.atlassian.bamboo.v2.build.BuildChangesImpl;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
-import com.opensymphony.util.UrlUtils;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
 import edu.nyu.cs.javagit.api.commands.*;
@@ -283,6 +282,11 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         options.setOptB(localBranch);
         gitCheckout.checkout( sourceDir, options, remoteBranch );
     }
+    private void checkoutExistingLocalBranch(File sourceDir, Ref localBranch) throws IOException, JavaGitException {
+        GitCheckout gitCheckout = new GitCheckout();
+        GitCheckoutOptions options = new GitCheckoutOptions();
+        gitCheckout.checkout( sourceDir, options, localBranch );
+    }
 
 
     private void submodule_update(File sourceDir) throws IOException, JavaGitException
@@ -331,9 +335,27 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
             log.debug("fetch complete");
 
             log.debug("doing merge");
-            GitMerge merge = new GitMerge();
-            // FIXME: should really only merge to the target revision
-            merge.merge(sourceDir, branchWithOriginPrefix);
+
+            final Ref currentCheckoutBranch = gitStatus(sourceDir);
+
+            if (isRemoteBranchSpecified()){
+                if (!branchWithOriginPrefix.isThisBranch(currentCheckoutBranch)){
+                    GitBranchResponse branchList = getAllBranches(sourceDir);
+                    final Ref branch = Ref.createBranchRef(this.remoteBranch);
+                    if (!branchList.containsExactBranchMatch( branch )) {
+                        checkout( sourceDir, branchWithOriginPrefix, branch);
+                        return; // No need to reset here.
+                    } else {
+                        checkoutExistingLocalBranch( sourceDir, branch);
+                    }
+                }
+
+            } else {
+                branchWithOriginPrefix = Ref.createRemoteRef( "origin", currentCheckoutBranch.getName());
+            }
+
+            GitResetOptions gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, branchWithOriginPrefix);
+            GitReset.gitReset( sourceDir, gitResetOptions);
         } else {
             log.debug("no repo found, creating");
             clone(repositoryUrl, sourceDir, null);

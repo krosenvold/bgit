@@ -2,6 +2,7 @@ package com.atlassian.labs.bamboo.git.model;
 
 import com.atlassian.bamboo.commit.Commit;
 import com.atlassian.bamboo.commit.CommitFile;
+import edu.nyu.cs.javagit.api.Ref;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -54,6 +55,10 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
         return sha;
     }
 
+
+    public Ref getShaRef(){
+        return Ref.createSha1Ref(getSha().getSha()); 
+    }
 
     public boolean isThis(Sha sha){
         return (this.sha.equals(sha));

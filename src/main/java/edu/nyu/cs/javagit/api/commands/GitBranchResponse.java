@@ -67,6 +67,15 @@ abstract public class GitBranchResponse implements CommandResponse {
         return false;
     }
 
+    public boolean containsExactBranchMatch(Ref branch){
+         for (Ref foundbranch : branchList ){
+             if (foundbranch.isExactMatch( branch)) {
+                 return true;
+             }
+         }
+         return false;
+     }
+
   public boolean equals(Object o) {
     if (!(o instanceof GitBranchResponse)) {
       return false;
