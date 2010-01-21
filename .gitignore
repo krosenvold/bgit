@@ -7,4 +7,8 @@ target
 bin
 testRepo
 masterRepo
+.gitignore
+.classpath
+
+
 
