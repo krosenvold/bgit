@@ -18,6 +18,8 @@ public class HardCodedRepo {
     public static final CommitDescriptor COMMIT_4208 =  new CommitDescriptor(new Sha("4208d196d885a8a09bc346999aa7a087ff150fb0"), "MergeBranchFile3.txt", "Thu Nov 12 21:29:46 2009 +0100", "Thu Nov 12 21:29:46 2009 +0100", COMMIT_2813);
     public static final CommitDescriptor COMMIT_Merge_aBranch_featureDefault =  new CommitDescriptor(new Sha("34a1c949e2d7e9f138f0fab2c0829c2a134c21a3"), null, "Thu Nov 12 21:30:06 2009 +0100", "Thu Nov 12 21:30:06 2009 +0100", COMMIT_7594_Intertwined, COMMIT_4208);
 
+    public static final CommitDescriptor NONEXISTANT_SHA1 =  new CommitDescriptor(new Sha("046ebe812ad72a76fc35a4f4fb1eb104a4560e55"), "MergeBranchFile3.txt", "Thu Nov 12 21:29:46 2009 +0100", "Thu Nov 12 21:29:46 2009 +0100", COMMIT_2813);
+
     public static CommitDescriptor getRepoTip(){
         return COMMIT_Merge_aBranch_featureDefault;
     }

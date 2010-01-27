@@ -184,6 +184,17 @@ public class GitRepositoryTest
         commitDescriptor.assertHistoryMatch( results, HardCodedRepo.first.getSha());
     }
 
+    @Test(expected = JavaGitException.class)
+    public void testCollectChangesFromNonExistingSha1() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository( "featureDefault");
+        File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+
+        gitRepository.detectCommitsForUrl(HardCodedRepo.NONEXISTANT_SHA1.getSha().getSha() , results, sourceDir, "UT-KEY");
+        
+    }
+
     @Test
     public void testHistoryWithMergeCommit() throws IOException, JavaGitException, RepositoryException {
         GitRepository gitRepository = getGitRepository( "featureDefault");
@@ -327,7 +338,6 @@ public class GitRepositoryTest
 
      private File getFreshCopyInCheckoutDir(GitRepository gitRepository) throws IOException, JavaGitException {
         final File directory = getCheckoutDirectory(getFreshWorkingCopyDir());
-//        GitCloneOptions gitCloneOptions = new GitCloneOptions(false, true, false);
         gitRepository.cloneOrFetch( directory);
         return directory;
     }

@@ -44,7 +44,12 @@ public class GitLogResponse implements CommandResponse {
 	public boolean containsError() {
 		return ( errors.size() > 0 );
 	}
-	
+
+
+
+    public void addError(ResponseString error){
+        errors.add ( error);
+    }
 	/**
 	 * 
 	 * @param sha This sets the sha extracted from each commit entry.

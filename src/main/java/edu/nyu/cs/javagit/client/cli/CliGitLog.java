@@ -321,6 +321,9 @@ public class CliGitLog implements IGitLog{
 				tmp = line.split(" ");
 				response.setAuthor(line.substring(tmp[0].length()).trim());
 			}
+            else if (line.startsWith("fatal: Invalid revision range")){
+                response.addError( new GitLogResponse.ResponseString(0, line));
+            }
 			//Date
 			else if (line.startsWith("Date")){
 				tmp = line.split(" ");
