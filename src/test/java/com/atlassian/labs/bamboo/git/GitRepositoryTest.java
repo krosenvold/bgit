@@ -184,15 +184,17 @@ public class GitRepositoryTest
         commitDescriptor.assertHistoryMatch( results, HardCodedRepo.first.getSha());
     }
 
-    @Test(expected = JavaGitException.class)
+    @Test
     public void testCollectChangesFromNonExistingSha1() throws IOException, JavaGitException, RepositoryException {
         GitRepository gitRepository = getGitRepository( "featureDefault");
         File sourceDir = getFreshCopyInCheckoutDir(gitRepository);
 
         List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
 
-        gitRepository.detectCommitsForUrl(HardCodedRepo.NONEXISTANT_SHA1.getSha().getSha() , results, sourceDir, "UT-KEY");
-        
+        final String s = gitRepository.detectCommitsForUrl(HardCodedRepo.NONEXISTANT_SHA1.getSha().getSha(), results, sourceDir, "UT-KEY");
+        assertEquals(HardCodedRepo.COMMIT_Merge_aBranch_featureDefault.getSha().getSha(), s );
+        assertEquals(10, results.size());// This is a bit of a weird assert since I do not exactly understand why it gives me 10 items.
+
     }
 
     @Test

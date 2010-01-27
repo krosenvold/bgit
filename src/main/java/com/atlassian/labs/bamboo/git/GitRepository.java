@@ -181,7 +181,18 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
 
         opt.setOptFileDetails(true);
-        List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt);
+        List<GitLogResponse.Commit> gitCommits = null;
+        try {
+           gitCommits = gitLog.log(checkoutDir, opt);
+        } catch (JavaGitException e){
+            // Typically because the sha1 does not exist. Rebase. has happened.
+
+            // Todo: In the checkout, if there is a checkout and it is diverged from origin/branch,
+            // we could detect the git merge-base and diff from there
+            opt = new GitLogOptions();
+            opt.setOptLimitCommitMax(true, 50);
+            gitCommits = gitLog.log(checkoutDir, opt);
+        }
         if (gitCommits.size() > 0)
         {
             log.debug("commits found:"+gitCommits.size());
@@ -318,9 +329,8 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
      * A) A clone of a repository. When cloning, the proper branch is checked if it is not correct by default.
      * B) A fetch. Since the repo is created by use case A, it will always be on the proper branch.
      *
-     * If we ever should support switching branches, it should be considered realized by ditching the
-     * entire repository, probably using the isRepositoryDifferent method or similar.
-     *
+     * Branch switching is supported.
+     * 
      * @param sourceDir The checkout directory
      * @throws IOException When something bad happens
      * @throws JavaGitException When something else bad happens.
@@ -332,9 +342,15 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
             CliGitFetch fetch = new CliGitFetch();
             log.debug("doing fetch");
             fetch.fetch(sourceDir);
-            log.debug("fetch complete");
 
-            log.debug("doing merge");
+
+            // Todo: At this point we might do rebase detection. Or maybe later. IN collectchanged. Just as good.
+            /*
+            wereHamster said:
+                    to see if origin/bax has been rebased, do git fetch origin; test "$(git rev-parse origin/bax..origin/baz@{1})" && echo "origin/baz has been
+                     rebased"
+
+             */
 
             final Ref currentCheckoutBranch = gitStatus(sourceDir);
 
@@ -354,6 +370,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
                 branchWithOriginPrefix = Ref.createRemoteRef( "origin", currentCheckoutBranch.getName());
             }
 
+            log.debug("resetting local branch to point at " + branchWithOriginPrefix);
             GitResetOptions gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, branchWithOriginPrefix);
             GitReset.gitReset( sourceDir, gitResetOptions);
         } else {
