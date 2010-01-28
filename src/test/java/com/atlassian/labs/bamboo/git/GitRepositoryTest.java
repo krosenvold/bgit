@@ -10,10 +10,7 @@ import com.atlassian.labs.bamboo.git.model.HardCodedRepo;
 import com.atlassian.labs.bamboo.git.model.Sha;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.CommandResponse;
-import edu.nyu.cs.javagit.api.commands.GitCloneOptions;
-import edu.nyu.cs.javagit.api.commands.GitReset;
-import edu.nyu.cs.javagit.api.commands.GitResetOptions;
+import edu.nyu.cs.javagit.api.commands.*;
 import edu.nyu.cs.javagit.client.GitResetResponseImpl;
 import edu.nyu.cs.javagit.client.cli.IParser;
 import edu.nyu.cs.javagit.client.cli.ProcessUtilities;
@@ -62,6 +59,23 @@ public class GitRepositoryTest
         assertTrue( GitRepository.containsValidRepo( sourceDir));
 
         assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
+    }
+
+    @Test
+    public void testCloneWithREquestedSha1() throws IOException, JavaGitException {
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
+
+        assertFalse( GitRepository.containsValidRepo( sourceDir));
+        gitRepository.cloneOrFetch(sourceDir, HardCodedRepo.second_a55e.getSha().getSha());
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
+
+        assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
+
+        assertEquals( gitRepository.gitLog(sourceDir,1 ).get(0).getSha(), HardCodedRepo.second_a55e.getSha().getSha());
+
+        gitRepository.cloneOrFetch(sourceDir, HardCodedRepo.first.getSha().getSha());
+        assertEquals( gitRepository.gitLog(sourceDir,1 ).get(0).getSha(), HardCodedRepo.first.getSha().getSha());
     }
 
     @Test

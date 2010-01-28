@@ -50,6 +50,13 @@ background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
 <h2>Release notes</h2>
+
+1.2-SNAPSHOT
+
+- Fixed race condition where build agent could check out different version than master bamboo agent thought.
+- Fixed issue where the build would not move on when the last-built revision was no longer present in the
+  repository due to rebasing. Change detection was returning "no change"
+
 1.1.9 RELEASE NOTES
 
 - This version includes greatly improved checkout/fetch/update algorithm that should also handle rebases

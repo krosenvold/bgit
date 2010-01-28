@@ -81,6 +81,10 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     private Map<String, Long> externalPathRevisionMappings = new HashMap<String, Long>();
 
 
+    /*
+     * Used by central bamboo server to determine changes. 
+     */
+
     @NotNull
     public synchronized  BuildChanges collectChangesSinceLastBuild( @NotNull String planKey, @NotNull String lastVcsRevisionKey) throws RepositoryException
     {
@@ -131,6 +135,8 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
     }
 
+    // Todo: Make sure we use vcsRevisionKey in cloneOrFetch
+
     @NotNull public String retrieveSourceCode( @NotNull String planKey, @Nullable String vcsRevisionKey) throws RepositoryException
     {
         log.debug("retrieving source code");
@@ -138,7 +144,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         {
                 getSubstitutedRepositoryUrl();
                 File sourceDir = getCheckoutDirectory(planKey); // sourceedir = xxx/checkout
-                cloneOrFetch(sourceDir);
+                cloneOrFetch(sourceDir, vcsRevisionKey);
                 submodule_update(sourceDir);
                 return detectCommitsForUrl(vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
         } catch (IOException e) {
@@ -181,14 +187,21 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
 
         opt.setOptFileDetails(true);
-        List<GitLogResponse.Commit> gitCommits = null;
+        List<GitLogResponse.Commit> gitCommits;
         try {
            gitCommits = gitLog.log(checkoutDir, opt);
         } catch (JavaGitException e){
-            // Typically because the sha1 does not exist. Rebase. has happened.
+            // Typically because the sha1 does not exist. Rebase has happened.
 
             // Todo: In the checkout, if there is a checkout and it is diverged from origin/branch,
             // we could detect the git merge-base and diff from there
+/*            wereHamster said:
+                    to see if origin/bax has been rebased, do git fetch origin; test "$(git rev-parse origin/bax..origin/baz@{1})" && echo "origin/baz has been
+                     rebased" */
+            // We *should* do rebase-detection somewhere in the collectChangesSinceLastBuild, since the server will always be able to tell,
+            // since it always has the history from the previous build.
+
+
             opt = new GitLogOptions();
             opt.setOptLimitCommitMax(true, 50);
             gitCommits = gitLog.log(checkoutDir, opt);
@@ -280,13 +293,18 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     
 
     Ref gitStatus(File sourceDir) throws IOException, JavaGitException {
-         GitStatus gitStatus = new GitStatus();
-         GitStatusOptions gitStatusOptions = new GitStatusOptions();
-         gitStatusOptions.setOptAll(true);
-         GitStatusResponse response = gitStatus.status(sourceDir, gitStatusOptions);
+        GitStatusResponse response = getGitStatusResponse(sourceDir);
          return response.getBranch();
      }
 
+    GitStatusResponse getGitStatusResponse(File sourceDir) throws JavaGitException, IOException {
+        GitStatus gitStatus = new GitStatus();
+        GitStatusOptions gitStatusOptions = new GitStatusOptions();
+        gitStatusOptions.setOptAll(true);
+        return gitStatus.status(sourceDir, gitStatusOptions);
+    }
+
+    
     private void checkout(File sourceDir, Ref remoteBranch, Ref localBranch) throws IOException, JavaGitException {
         GitCheckout gitCheckout = new GitCheckout();
         GitCheckoutOptions options = new GitCheckoutOptions();
@@ -336,6 +354,15 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
      * @throws JavaGitException When something else bad happens.
      */
     void cloneOrFetch(File sourceDir) throws IOException, JavaGitException {
+        reallyCloneOrFetch( sourceDir, null);
+    }
+
+    void cloneOrFetch(File sourceDir, String requestedVersion) throws IOException, JavaGitException {
+        reallyCloneOrFetch(sourceDir, isSha1( requestedVersion)  ? Ref.createSha1Ref(requestedVersion) :  null);
+
+    }
+
+    void reallyCloneOrFetch(File sourceDir, Ref requestedTargetRevision) throws IOException, JavaGitException {
         Ref branchWithOriginPrefix = Ref.createBranchRef("origin/" + this.remoteBranch);
 
         if (containsValidRepo(sourceDir)) {
@@ -344,16 +371,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
             fetch.fetch(sourceDir);
 
 
-            // Todo: At this point we might do rebase detection. Or maybe later. IN collectchanged. Just as good.
-            /*
-            wereHamster said:
-                    to see if origin/bax has been rebased, do git fetch origin; test "$(git rev-parse origin/bax..origin/baz@{1})" && echo "origin/baz has been
-                     rebased"
-
-             */
-
             final Ref currentCheckoutBranch = gitStatus(sourceDir);
-
             if (isRemoteBranchSpecified()){
                 if (!branchWithOriginPrefix.isThisBranch(currentCheckoutBranch)){
                     GitBranchResponse branchList = getAllBranches(sourceDir);
@@ -366,15 +384,9 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
                     }
                 }
 
-            } else {
-                branchWithOriginPrefix = Ref.createRemoteRef( "origin", currentCheckoutBranch.getName());
             }
-
-            log.debug("resetting local branch to point at " + branchWithOriginPrefix);
-            GitResetOptions gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, branchWithOriginPrefix);
-            GitReset.gitReset( sourceDir, gitResetOptions);
         } else {
-            log.debug("no repo found, creating");
+            log.debug("no repo found, creating new clone");
             clone(repositoryUrl, sourceDir, null);
             submodule_update(sourceDir);
 
@@ -390,6 +402,16 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
                 }
             }
         }
+        // At this point the proper branch is checked out or created. NO matter which path is used.
+
+        final Ref currentCheckoutBranch = gitStatus(sourceDir);
+        if (requestedTargetRevision == null){
+            requestedTargetRevision = Ref.createRemoteRef( "origin", currentCheckoutBranch.getName());
+        }
+        log.debug("resetting local branch to point at " + requestedTargetRevision);
+        GitResetOptions gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, requestedTargetRevision);
+        GitReset.gitReset( sourceDir, gitResetOptions);
+
     }
 
     void clone(File sourceDir, GitCloneOptions gitCloneOptions) throws IOException, JavaGitException {
@@ -427,6 +449,14 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     boolean isOnBranch(File sourceDir, Ref branchName) throws IOException, JavaGitException {
         GitBranchResponse response = getAllBranches(sourceDir);
         return response.getCurrentBranch().equals( branchName);
+    }
+
+    List<GitLogResponse.Commit> gitLog(File sourceDir, int numItems) throws IOException, JavaGitException {
+        GitLog gitLog = new GitLog();
+        GitLogOptions opt = new GitLogOptions();
+        opt.setOptLimitCommitOutputs(true, numItems);
+        opt.setOptFileDetails(true);
+        return gitLog.log(sourceDir, opt);
     }
 
     private GitBranchResponse getAllBranches(File sourceDir) throws IOException, JavaGitException {
