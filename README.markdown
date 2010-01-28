@@ -5,10 +5,20 @@ This plugin provides Git support to the excellent Atlassian Bamboo continous int
 It is compatible with Bamboo 2.2.x and above, including 2.5.
 
 It also works on Windows, but requires cygwin git (not msysgit).
-    
+
+<h2>Features</h2>
+
+* Full branch support
+* This plugin supports fairly avanced git-fu and handles branches, merges and rebases well.
+* Regular git usage or git-hub projects.
+* Assuming git-hub hooks work with your bamboo version, you should be able to get hooks too.
+* Excellent test coverage of all operations
+
+
 <h2>RELEASES</h2>
 
-The current release is 1.1.9. Only the latest release is available for <a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.9.jar">download</a>. Older releases will have to be built from source, which is really easy:
+The current release is 1.1.9. Only the latest release is available for
+<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.9.jar">download</a>. Older releases will have to be built from source, which is really easy.
 
 <h3>Branch/Release policy</h3>
 
@@ -28,13 +38,25 @@ cd bgit
 mvn install
 # the generated .jar will be inside "target" folder.
 # If problems with unit tests failing, remove masterRepo and testRepo* folders
-# You MUST have git:// protocol access to github.com to be able to build
+# You MUST have git:// protocol access to github.com to be able to build. If not you can add -DskipTests to mvn command.
 </pre>
+
+A lot of people prefer a double symlink installation of the jar file when building from source:
+<pre>
+# Assumes bgit is in  ~/bgit
+ln -s ~/bgit/target/git-plugin-1.2-SNAPSHOT.jar  ~/current-git-plugin
+ln -s ~/current-git-plugin $BAMBOO_INSTALL_DIR/webapp/WEB-INF/lib/git-plugin.jar
+</pre>
+In this way you can just change the symlink in your home directory as the version number changes, instead of
+messing with copying the jar file.
+
 
 <h2>INSTALLATION</h2>
 * Copy to $BAMBOO_INSTALL_DIR/webapp/WEB-INF/lib
 * Remove older versions from same folder
 * Restart Bamboo
+
+
 
 Now when you create or edit plans you will be able to select “Git” as the
 repository provider.
