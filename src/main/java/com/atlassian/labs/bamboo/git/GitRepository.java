@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class GitRepository extends AbstractRepository implements InitialBuildAwareRepository, MutableQuietPeriodAwareRepository
 {
@@ -51,6 +52,8 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
 
     private static final String EXTERNAL_PATH_MAPPINGS2 = REPO_PREFIX + "externalsToRevisionMappings";
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}");
+
 
     // ------------------------------------------------------------------------------------------------- Type Properties
     private String repositoryUrl;
@@ -59,6 +62,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     private String passphrase;
     private String webRepositoryUrlRepoName;
     private String remoteBranch;
+    private boolean hideAuthorEmail = true;
 
     // Quiet Period
     private final QuietPeriodHelper quietPeriodHelper = new QuietPeriodHelper(REPO_PREFIX);
@@ -224,6 +228,13 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
                     log.info("Author name is empty for " + commit.toString());
                     authorName = Author.UNKNOWN_AUTHOR;
                 }
+
+                if (hideAuthorEmail)
+                {
+                    authorName = EMAIL_PATTERN.matcher(authorName).replaceFirst("");
+                    authorName.trim();
+                }
+
                 commit.setAuthor(new AuthorImpl(authorName));
                 @SuppressWarnings({"deprecation"}) Date date2 = new Date(logEntry.getDateString());
                 commit.setDate(date2);
@@ -685,6 +696,14 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     public void setMaxRetries(int maxRetries)
     {
         this.maxRetries = maxRetries;
+    }
+
+    public boolean isHideAuthorEmail() {
+        return hideAuthorEmail;
+    }
+
+    public void setHideAuthorEmail(boolean hideAuthorEmail) {
+        this.hideAuthorEmail = hideAuthorEmail;
     }
 
     public int hashCode()
