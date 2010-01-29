@@ -78,6 +78,7 @@ able to checkout neither.
 - Fixed race condition where build agent could check out different version than master bamboo agent thought.
 - Fixed issue where the build would not move on when the last-built revision was no longer present in the
   repository due to rebasing. Change detection was returning "no change"
+- Does not show full email address - nice to keep those spammers away (Thanks to Luke Taylor)
 
 1.1.9 RELEASE NOTES
 
@@ -146,6 +147,7 @@ CHANGELOG
 - Alex Fisher (Rebasing fix)
 - Ivan Sungurov (isungurov)
 - Benjamin Reed (RangerRick)
+- Luke Taylor (tekul)
 
 <h2>Related links</h2>
 <ul>
