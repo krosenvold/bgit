@@ -39,11 +39,14 @@ mvn install
 # the generated .jar will be inside "target" folder.
 # If problems with unit tests failing, remove masterRepo and testRepo* folders
 # You MUST have git:// protocol access to github.com to be able to build. If not you can add -DskipTests to mvn command.
+# If you're running on an old-ish git (for instance 1.6.3.3) an the testCloneThenRebaseLocal test fails, you need to run
+# git config --global user.email "you@example.com"
+# git config --global user.name "Your Name"
 </pre>
 
 A lot of people prefer a double symlink installation of the jar file when building from source:
-<pre>
 # Assumes bgit is in  ~/bgit
+<pre>
 ln -s ~/bgit/target/git-plugin-1.2-SNAPSHOT.jar  ~/current-git-plugin
 ln -s ~/current-git-plugin $BAMBOO_INSTALL_DIR/webapp/WEB-INF/lib/git-plugin.jar
 </pre>
