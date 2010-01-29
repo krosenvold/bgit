@@ -9,16 +9,15 @@ It also works on Windows, but requires cygwin git (not msysgit).
 <h2>Features</h2>
 
 * Full branch support
-* This plugin supports fairly avanced git-fu and handles branches, merges and rebases well.
+* Supports fairly avanced git-fu and handles branches, merges and rebases well.
 * Regular git usage or git-hub projects.
 * Assuming git-hub hooks work with your bamboo version, you should be able to get hooks too.
 * Excellent test coverage of all operations
 
-
 <h2>RELEASES</h2>
 
-The current release is 1.1.9. Only the latest release is available for
-<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.1.9.jar">download</a>. Older releases will have to be built from source, which is really easy.
+The current release is 1.2. Only the latest release is available for
+<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.2.jar">download</a>. Older releases will have to be built from source, which is really easy.
 
 <h3>Branch/Release policy</h3>
 
@@ -69,20 +68,22 @@ should be able to access the repositories.
 
 All the groundwork was done by Don Brown from Atlassian. Until Atlassian can
 provide resources to the plugin I will be mantaining it here on github
-==== USAGE WARNING ====
+
+<h3>==== USAGE WARNING ====</h3>
 If you are using SSH make sure to use ssh keys. In general, make sure that a
 background script can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
 <h2>Release notes</h2>
 
-1.2-SNAPSHOT
+1.2 RELEASE NOTES
 
 - Fixed race condition where build agent could check out different version than master bamboo agent thought.
 - Fixed issue where the build would not move on when the last-built revision was no longer present in the
   repository due to rebasing. Change detection was returning "no change"
 - Does not show full email address - nice to keep those spammers away (Thanks to Luke Taylor)
 - Fixed issue with "older" git versions (1.6.3.3) and branch detection.
+- Tested agents and agent based builds, and they work well.
 
 1.1.9 RELEASE NOTES
 
