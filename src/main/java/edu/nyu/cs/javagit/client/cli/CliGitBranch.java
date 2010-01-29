@@ -265,7 +265,7 @@ public class CliGitBranch implements IGitBranch {
   /**
    * Implementation of the <code>IParser</code> interface in GitBranchParser class.
    */
-  public class GitBranchParser implements IParser {
+  public static class GitBranchParser implements IParser {
     // The response object for a branch operation.
     private GitBranchResponseImpl response;
 
@@ -321,6 +321,9 @@ public class CliGitBranch implements IGitBranch {
      */
     public void handleBranchDisplay(String line) {
       String nextWord;
+      if (line.startsWith("* (no branch)")) {
+          return;
+      }
       boolean isCurrentBranch = false;
       StringTokenizer st = new StringTokenizer(line);
 

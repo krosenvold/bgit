@@ -45,7 +45,7 @@ mvn install
 </pre>
 
 A lot of people prefer a double symlink installation of the jar file when building from source:
-# Assumes bgit is in  ~/bgit
+Assumes bgit is in  ~/bgit
 <pre>
 ln -s ~/bgit/target/git-plugin-1.2-SNAPSHOT.jar  ~/current-git-plugin
 ln -s ~/current-git-plugin $BAMBOO_INSTALL_DIR/webapp/WEB-INF/lib/git-plugin.jar
@@ -82,6 +82,7 @@ able to checkout neither.
 - Fixed issue where the build would not move on when the last-built revision was no longer present in the
   repository due to rebasing. Change detection was returning "no change"
 - Does not show full email address - nice to keep those spammers away (Thanks to Luke Taylor)
+- Fixed issue with "older" git versions (1.6.3.3) and branch detection.
 
 1.1.9 RELEASE NOTES
 
