@@ -83,6 +83,7 @@ able to checkout neither.
   repository due to rebasing. Change detection was returning "no change"
 - Does not show full email address - nice to keep those spammers away (Thanks to Luke Taylor)
 - Fixed issue with "older" git versions (1.6.3.3) and branch detection.
+- Tested agents and agent based builds, and they work well.
 
 1.1.9 RELEASE NOTES
 
