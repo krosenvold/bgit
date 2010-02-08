@@ -206,9 +206,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
             // since it always has the history from the previous build.
 
 
-            opt = new GitLogOptions();
-            opt.setOptLimitCommitMax(true, 50);
-            gitCommits = gitLog.log(checkoutDir, opt);
+            gitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
         }
         if (gitCommits.size() > 0)
         {
@@ -276,7 +274,13 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         GitLogOptions opt = new GitLogOptions();
         opt.setOptLimitCommitAfter(true, lastRevisionChecked);
         opt.setOptFileDetails(true);
-        List<GitLogResponse.Commit> CandidateGitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/" + remoteBranch));
+        List<GitLogResponse.Commit> CandidateGitCommits = null;
+        try {
+             CandidateGitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/" + remoteBranch));
+        } catch (JavaGitException e){
+            CandidateGitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
+        }
+
         if (CandidateGitCommits.size() < 1) {
             throw new RepositoryException("No commits with revision: " + lastRevisionChecked);
         }
@@ -288,6 +292,15 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
         log.info("lastRevisionChecked " + lastRevisionChecked + " did not look like a sha1, but did not match a commit date. This may happen if the commit is gone");
         return lastRevisionChecked;
+    }
+
+    private List<GitLogResponse.Commit> getDefaultLogWhenWeDontKnowWhatElsetoDo(File checkoutDir, GitLog gitLog) throws JavaGitException, IOException {
+        GitLogOptions opt;
+        List<GitLogResponse.Commit> CandidateGitCommits;
+        opt = new GitLogOptions();
+        opt.setOptLimitCommitMax(true, 50);
+        CandidateGitCommits = gitLog.log(checkoutDir, opt);
+        return CandidateGitCommits;
     }
 
     private boolean isANonSha1RevisionSpecifier(String lastRevisionChecked) {
