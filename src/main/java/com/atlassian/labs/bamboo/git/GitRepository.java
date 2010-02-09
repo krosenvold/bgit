@@ -205,7 +205,6 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
             // We *should* do rebase-detection somewhere in the collectChangesSinceLastBuild, since the server will always be able to tell,
             // since it always has the history from the previous build.
 
-
             gitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
         }
         if (gitCommits.size() > 0)
@@ -261,9 +260,10 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
 
                 commits.add(commit);
             }
+            log.debug("Repository change detected for " + repositoryUrl + ", returning "+latestRevisionOnServer);
             return latestRevisionOnServer;
         }
-        log.debug("returning last revision:"+lastRevisionChecked);
+        log.debug("No change detected, returning previous last revision:"+lastRevisionChecked);
         return lastRevisionChecked;
     }
 
