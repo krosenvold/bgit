@@ -436,7 +436,14 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
         log.debug("resetting local branch to point at " + requestedTargetRevision);
         GitResetOptions gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, requestedTargetRevision);
+        try {
         GitReset.gitReset( sourceDir, gitResetOptions);
+        } catch (JavaGitException e){
+            log.warn("Had problem resetting head, trying " + branchWithOriginPrefix.getName());
+            // Probably could not find SHA1
+            gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, branchWithOriginPrefix);
+            GitReset.gitReset( sourceDir, gitResetOptions);
+        }
 
     }
 

@@ -98,6 +98,23 @@ public class GitRepositoryTest
         assertEquals("Repository should be on feature1 branch", "feature1", ref.getName());
     }
 
+    @Test(expected = JavaGitException.class)
+    public void testResetWithNonExistantSha() throws IOException, JavaGitException {
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
+
+        assertFalse( GitRepository.containsValidRepo( sourceDir));
+        gitRepository.cloneOrFetch(sourceDir);
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
+
+        assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
+
+
+        GitResetOptions gitResetOptions = new GitResetOptions(GitResetOptions.ResetType.HARD, Ref.createSha1Ref("ABADCAFECAFEBABEeaa17774dddc4890852396a7"));
+        GitReset.gitReset( sourceDir, gitResetOptions);
+
+    }
+
 
     @Test
     public void testCloneThenRebaseLocal() throws IOException, JavaGitException {
