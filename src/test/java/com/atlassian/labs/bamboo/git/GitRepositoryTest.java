@@ -278,6 +278,38 @@ public class GitRepositoryTest
     }
 
     @Test
+    public void testCloneNonExistingPrevious() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
+
+        gitRepository.cloneOrFetch(sourceDir);
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl("e3bed58f697792d6e603c4c4a90cad1e9326a053", results, sourceDir, "UT-KEY");
+
+    }
+
+    @Test
+    public void testgetSha1FromCommitDate() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = getGitRepository("feature1");
+        File sourceDir = getFreshCheckoutDir();
+        gitRepository.cloneOrFetch(sourceDir);
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
+
+        String commit = gitRepository.getSha1FromCommitDate("Fri Oct 9 15:38:10 2009 +0200", sourceDir);
+        assertEquals( "a55e4702a0fdc210eaa17774dddc4890852396a7", commit);
+        
+        commit = gitRepository.getSha1FromCommitDate("Fri Oct 19 22:38:10 2009 +0200", sourceDir);// Fake
+        assertEquals( "84965cc8dfc8af7fca02c78373413aceafc73c2f", commit);
+
+        commit = gitRepository.getSha1FromCommitDate("YABBA", sourceDir);// Fake
+        assertEquals( "84965cc8dfc8af7fca02c78373413aceafc73c2f", commit);
+
+    }
+
+
+    @Test
     public void testLastCheckedRevisionIsNull() throws IOException, JavaGitException, RepositoryException {
         GitRepository gitRepository = getGitRepository("featureDefault");
         File sourceDir = getFreshCopyInCheckoutDir(gitRepository);

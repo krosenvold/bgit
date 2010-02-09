@@ -269,22 +269,24 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
 
 
 
-    private String getSha1FromCommitDate(String lastRevisionChecked, File checkoutDir) throws JavaGitException, IOException, RepositoryException {
+    String getSha1FromCommitDate(String lastRevisionChecked, File checkoutDir) throws JavaGitException, IOException, RepositoryException {
         GitLog gitLog = new GitLog();
         GitLogOptions opt = new GitLogOptions();
         opt.setOptLimitCommitAfter(true, lastRevisionChecked);
         opt.setOptFileDetails(true);
-        List<GitLogResponse.Commit> CandidateGitCommits = null;
+        List<GitLogResponse.Commit> candidateGitCommits = null;
         try {
-             CandidateGitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/" + remoteBranch));
+             candidateGitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/" + remoteBranch));
         } catch (JavaGitException e){
-            CandidateGitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
+            candidateGitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
+            return candidateGitCommits.get( candidateGitCommits.size() -1  ).getSha(); // We're just guessing, do an old one
         }
 
-        if (CandidateGitCommits.size() < 1) {
-            throw new RepositoryException("No commits with revision: " + lastRevisionChecked);
+        if (candidateGitCommits.size() < 1) {
+            candidateGitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
+            return candidateGitCommits.get( candidateGitCommits.size() -1 ).getSha(); // We're just guessing, do an old one
         }
-        for (GitLogResponse.Commit commit : CandidateGitCommits) {
+        for (GitLogResponse.Commit commit : candidateGitCommits) {
             if (commit.getDateString().equals(lastRevisionChecked)) {
                 log.info("Converting lastRevisionChecked from Date into SHA hash");
                 return commit.getSha();
