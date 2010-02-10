@@ -205,6 +205,8 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
             // We *should* do rebase-detection somewhere in the collectChangesSinceLastBuild, since the server will always be able to tell,
             // since it always has the history from the previous build.
 
+            // Important note; we always need something here<
+
             gitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
         }
         if (gitCommits.size() > 0)
@@ -279,7 +281,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
              candidateGitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/" + remoteBranch));
         } catch (JavaGitException e){
             candidateGitCommits = getDefaultLogWhenWeDontKnowWhatElsetoDo(checkoutDir, gitLog);
-            return candidateGitCommits.get( candidateGitCommits.size() -1  ).getSha(); // We're just guessing, do an old one
+            return candidateGitCommits.get( 0  ).getSha(); // #fail, just take the most recent one
         }
 
         if (candidateGitCommits.size() < 1) {
@@ -298,11 +300,11 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
 
     private List<GitLogResponse.Commit> getDefaultLogWhenWeDontKnowWhatElsetoDo(File checkoutDir, GitLog gitLog) throws JavaGitException, IOException {
         GitLogOptions opt;
-        List<GitLogResponse.Commit> CandidateGitCommits;
+        List<GitLogResponse.Commit> candidateGitCommits;
         opt = new GitLogOptions();
         opt.setOptLimitCommitMax(true, 50);
-        CandidateGitCommits = gitLog.log(checkoutDir, opt);
-        return CandidateGitCommits;
+        candidateGitCommits = gitLog.log(checkoutDir, opt);
+        return candidateGitCommits;
     }
 
     private boolean isANonSha1RevisionSpecifier(String lastRevisionChecked) {
