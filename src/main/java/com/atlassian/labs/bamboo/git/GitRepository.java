@@ -328,7 +328,6 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     GitStatusResponse getGitStatusResponse(File sourceDir) throws JavaGitException, IOException {
         GitStatus gitStatus = new GitStatus();
         GitStatusOptions gitStatusOptions = new GitStatusOptions();
-        gitStatusOptions.setOptAll(true);
         return gitStatus.status(sourceDir, gitStatusOptions);
     }
 
