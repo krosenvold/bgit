@@ -126,7 +126,6 @@ public class CliGitStatus implements IGitStatus {
    */
   public GitStatusResponse statusAll(File repositoryPath) throws JavaGitException, IOException {
     GitStatusOptions options = new GitStatusOptions();
-    options.setOptAll(true);
     return status(repositoryPath, options);
   }
   
