@@ -67,7 +67,7 @@ public final class JavaGitConfiguration {
     String gitPrefix = "";
     if (path != null) {
       // We got a path passed in as an argument.
-      gitPrefix = path.getAbsolutePath() + File.pathSeparator;
+      gitPrefix = path.getAbsolutePath() + File.separator;
     } else if (gitPath != null) {
       // They didn't pass in a path, but previously set it explicitly via setGitPath.
       gitPrefix = getGitCommandPrefix();
@@ -122,7 +122,7 @@ public final class JavaGitConfiguration {
    * @return The <code>String</code> that points to the git executable.
    */
   public static String getGitCommandPrefix() {
-    return ((gitPath == null) ? "" : (gitPath.getAbsolutePath() + File.pathSeparator));
+    return ((gitPath == null) ? "" : (gitPath.getAbsolutePath() + File.separator));
   }
 
   /**
