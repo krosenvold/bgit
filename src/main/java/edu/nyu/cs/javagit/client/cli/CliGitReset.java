@@ -167,6 +167,8 @@ public class CliGitReset implements IGitReset {
       } else if (numLinesParsed > 0) {
         errorMsg = new StringBuffer();
         errorMsg.append("Unexpected results.  line" + (numLinesParsed + 1) + "=[" + line + "]");
+      } else if (line.trim().length() == 0 ) {
+            // Skip a blank line
       } else {
         errorMsg = new StringBuffer();
         errorMsg.append("line1=[" + line + "]");
