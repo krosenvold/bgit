@@ -16,8 +16,8 @@ It also works on Windows, but requires cygwin git (not msysgit).
 
 <h2>RELEASES</h2>
 
-The current release is 1.2. Only the latest release is available for
-<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.2.jar">download</a>. Older releases will have to be built from source, which is really easy.
+The current release is 1.2.2 Only the latest release is available for
+<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.2.2.jar">download</a>. Older releases will have to be built from source, which is really easy.
 
 <h3>Branch/Release policy</h3>
 
@@ -69,12 +69,24 @@ should be able to access the repositories.
 All the groundwork was done by Don Brown from Atlassian. Until Atlassian can
 provide resources to the plugin I will be mantaining it here on github
 
+
+<h2>Problem tracking</h2>
+It is important that permissions and git setup is correct on ALL nodes (with or without remote agents)
+
+Also ensure that all remote agents AND the local agent can perform the clone, permission problems related to file systems
+often give low-quality error messages, often related to complaints about the "checkout" folder.
+
+
 <h3>==== USAGE WARNING ====</h3>
 If you are using SSH make sure to use ssh keys. In general, make sure that a
-background script can pull from your repo. If it can't then Bamboo will not be
+shell script (running as the same user) can pull from your repo. If it can't then Bamboo will not be
 able to checkout neither.
 
 <h2>Release notes</h2>
+
+1.2.2 & 1.2.1
+
+Issue 8, 11 and 12 fixed in these two. Time for a binary release ;) 
 
 1.2 RELEASE NOTES
 
