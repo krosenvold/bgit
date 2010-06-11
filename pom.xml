@@ -90,14 +90,14 @@
             <artifactId>junit</artifactId>
             <groupId>junit</groupId>
             <version>4.7</version>
-<scope>test</scope>
+            <scope>test</scope>
         </dependency>
         <!-- dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>jgit</artifactId>
             <version>0.6.0-23-g36af95b7</version>
         </dependency -->
-        
+
     </dependencies>
 
     <properties>

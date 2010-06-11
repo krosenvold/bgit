@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.commands.CommandResponse;
 import edu.nyu.cs.javagit.utilities.ExceptionMessageMap;
@@ -31,11 +34,13 @@ import edu.nyu.cs.javagit.utilities.ExceptionMessageMap;
  */
 public class ProcessUtilities {
 
+  private static final Log LOG = LogFactory.getLog(ProcessUtilities.class);
+
   // TODO (jhl): add unit tests for this class.
 
   /**
    * Start a process.
-   * 
+   *
    * @param pb
    *          The <code>ProcessBuilder</code> to use to start the process.
    * @return The started process.
@@ -55,7 +60,7 @@ public class ProcessUtilities {
 
   /**
    * Reads the output from the process and prints it to stdout.
-   * 
+   *
    * @param p
    *          The process from which to read the output.
    * @exception IOException
@@ -71,7 +76,7 @@ public class ProcessUtilities {
           break;
         }
         parser.parseLine(str);
-          System.out.println("--------  "+str);
+        LOG.debug("  " + str);
       } catch (IOException e) {
         /*
          * TODO: add logging of any information already read from the InputStream. -- jhl388
@@ -86,7 +91,7 @@ public class ProcessUtilities {
 
   /**
    * Waits for a process to terminate and then destroys it.
-   * 
+   *
    * @param p
    *          The process to wait for and destroy.
    * @return The exit value of the process. By convention, 0 indicates normal termination.
@@ -117,7 +122,7 @@ public class ProcessUtilities {
   /**
    * Runs the command specified in the command line with the specified working directory. The
    * IParser is used to parse the response given by the command line.
-   * 
+   *
    * @param workingDirectory
    *          The working directory in with which to start the process.
    * @param commandLine
@@ -132,7 +137,7 @@ public class ProcessUtilities {
   public static CommandResponse runCommand(File workingDirectory, List<String> commandLine,
       IParser parser) throws IOException, JavaGitException {
     ProcessBuilder pb = new ProcessBuilder(commandLine);
-     System.err.println("============ command:"+commandLine);
+    LOG.debug("Command:" + commandLine);
     if (workingDirectory != null) {
       pb.directory(workingDirectory);
     }
