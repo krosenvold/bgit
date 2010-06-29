@@ -1,24 +1,14 @@
 package com.atlassian.labs.bamboo.git;
 
-import com.atlassian.bamboo.author.Author;
-import com.atlassian.bamboo.author.AuthorImpl;
-import com.atlassian.bamboo.commit.Commit;
-import com.atlassian.bamboo.commit.CommitFile;
-import com.atlassian.bamboo.commit.CommitFileImpl;
-import com.atlassian.bamboo.commit.CommitImpl;
-import com.atlassian.bamboo.repository.*;
-import com.atlassian.bamboo.utils.ConfigUtils;
-import com.atlassian.bamboo.utils.error.ErrorCollection;
-import com.atlassian.bamboo.v2.build.BuildChanges;
-import com.atlassian.bamboo.v2.build.BuildChangesImpl;
-import com.atlassian.bamboo.v2.build.BuildContext;
-import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.*;
-import edu.nyu.cs.javagit.client.cli.CliGitClone;
-import edu.nyu.cs.javagit.client.cli.CliGitFetch;
-import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -28,12 +18,47 @@ import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.regex.Pattern;
+import com.atlassian.bamboo.author.Author;
+import com.atlassian.bamboo.author.AuthorImpl;
+import com.atlassian.bamboo.commit.Commit;
+import com.atlassian.bamboo.commit.CommitFile;
+import com.atlassian.bamboo.commit.CommitFileImpl;
+import com.atlassian.bamboo.commit.CommitImpl;
+import com.atlassian.bamboo.repository.AbstractRepository;
+import com.atlassian.bamboo.repository.InitialBuildAwareRepository;
+import com.atlassian.bamboo.repository.MutableQuietPeriodAwareRepository;
+import com.atlassian.bamboo.repository.QuietPeriodHelper;
+import com.atlassian.bamboo.repository.Repository;
+import com.atlassian.bamboo.repository.RepositoryException;
+import com.atlassian.bamboo.utils.ConfigUtils;
+import com.atlassian.bamboo.utils.error.ErrorCollection;
+import com.atlassian.bamboo.v2.build.BuildChanges;
+import com.atlassian.bamboo.v2.build.BuildChangesImpl;
+import com.atlassian.bamboo.v2.build.BuildContext;
+import com.atlassian.bamboo.v2.build.repository.RepositoryV2;
+import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
 
-public class GitRepository extends AbstractRepository implements InitialBuildAwareRepository, MutableQuietPeriodAwareRepository
+import edu.nyu.cs.javagit.api.JavaGitException;
+import edu.nyu.cs.javagit.api.Ref;
+import edu.nyu.cs.javagit.api.commands.GitBranch;
+import edu.nyu.cs.javagit.api.commands.GitBranchOptions;
+import edu.nyu.cs.javagit.api.commands.GitBranchResponse;
+import edu.nyu.cs.javagit.api.commands.GitCheckout;
+import edu.nyu.cs.javagit.api.commands.GitCheckoutOptions;
+import edu.nyu.cs.javagit.api.commands.GitCloneOptions;
+import edu.nyu.cs.javagit.api.commands.GitLog;
+import edu.nyu.cs.javagit.api.commands.GitLogOptions;
+import edu.nyu.cs.javagit.api.commands.GitLogResponse;
+import edu.nyu.cs.javagit.api.commands.GitReset;
+import edu.nyu.cs.javagit.api.commands.GitResetOptions;
+import edu.nyu.cs.javagit.api.commands.GitStatus;
+import edu.nyu.cs.javagit.api.commands.GitStatusOptions;
+import edu.nyu.cs.javagit.api.commands.GitStatusResponse;
+import edu.nyu.cs.javagit.client.cli.CliGitClone;
+import edu.nyu.cs.javagit.client.cli.CliGitFetch;
+import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
+
+public class GitRepository extends AbstractRepository implements InitialBuildAwareRepository, MutableQuietPeriodAwareRepository, RepositoryV2
 {
     private static final Log log = LogFactory.getLog(GitRepository.class);
 
@@ -58,9 +83,9 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     // ------------------------------------------------------------------------------------------------- Type Properties
     private String repositoryUrl;
     private String webRepositoryUrl;
-    private String username;
-    private String passphrase;
-    private String webRepositoryUrlRepoName;
+//    private String username;
+//    private String passphrase;
+//    private String webRepositoryUrlRepoName;
     private String remoteBranch;
     private boolean hideAuthorEmail = true;
 
@@ -158,9 +183,13 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
     }
 
+    @NotNull
+	public String retrieveSourceCode(@NotNull BuildContext buildContext, @Nullable String vcsRevisionKey) throws RepositoryException {
+    	return retrieveSourceCode(buildContext.getPlanKey(), vcsRevisionKey);
+	}
     /**
      *
-     * Detects the commits for the given repositpry since the revision and HEAD for that URL
+     * Detects the commits for the given repository since the revision and HEAD for that URL
      *
      * @param lastRevisionChecked - latest revision checked for this URL. Null if never checked
      * @param commits - the commits are added to this list
@@ -451,7 +480,6 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     void clone(File sourceDir, GitCloneOptions gitCloneOptions) throws IOException, JavaGitException {
         clone( repositoryUrl, sourceDir, gitCloneOptions);
     }
-    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     static void clone(String repositoryUrl, File sourceDir, GitCloneOptions gitCloneOptions) throws IOException, JavaGitException {
         ensureDirExists( sourceDir);
         CliGitClone clone = new CliGitClone();
@@ -596,8 +624,6 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     {
     }
 
-
-    @SuppressWarnings({"UnusedDeclaration"})
     public boolean isAdvancedOptionEnabled( BuildConfiguration buildConfiguration)
     {
         final boolean useExternals = buildConfiguration.getBoolean(USE_EXTERNALS, false);

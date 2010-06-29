@@ -102,7 +102,7 @@
 
     <properties>
         <atlassian.plugin.key>com.atlassian.labs.bamboo.git.git-plugin</atlassian.plugin.key>
-        <atlassian.product.version>2.5</atlassian.product.version>
+        <atlassian.product.version>2.6.1</atlassian.product.version>
         <jdkLevel>1.5</jdkLevel>
     </properties>
 </project>
