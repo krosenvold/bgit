@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
 import edu.nyu.cs.javagit.client.ClientManager;
 import edu.nyu.cs.javagit.client.IClient;
 import edu.nyu.cs.javagit.client.IGitSubmodule;

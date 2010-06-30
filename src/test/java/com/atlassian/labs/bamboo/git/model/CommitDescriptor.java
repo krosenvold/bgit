@@ -19,7 +19,6 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
     private final Sha sha;
     private final String expectedFile;
-    @SuppressWarnings({"FieldCanBeLocal"})
     private final Calendar authorDate;
     private final Calendar commitDate;
     private final List<CommitDescriptor> parents;
@@ -172,7 +171,6 @@ public class CommitDescriptor implements Comparable<CommitDescriptor> {
         }
     }
 
-    @SuppressWarnings({"RedundantIfStatement"})
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

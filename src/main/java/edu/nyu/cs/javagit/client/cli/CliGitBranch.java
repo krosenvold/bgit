@@ -305,7 +305,7 @@ public class CliGitBranch implements IGitBranch {
             response.addMessages(line.substring(0, indexOfBranch + 6));
           }
           response.addIntoBranchList(Ref.createBranchRef(branchName));
-        } else if (null == line) {
+        } else if (line == null) {
           response.setResponseType(responseType.EMPTY);
         } else {
           handleBranchDisplay(line);

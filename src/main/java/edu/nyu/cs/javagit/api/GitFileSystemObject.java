@@ -40,7 +40,7 @@ public abstract class GitFileSystemObject {
 
   public static enum Status {
     // untracked (created but not added to the repository)
-    UNTRACKED,
+    UNTRACKED, 
     // new, waiting to commit
     NEW_TO_COMMIT,
     // in repository and deleted locally
@@ -176,16 +176,16 @@ public abstract class GitFileSystemObject {
     List<File> list = new ArrayList<File>();
     File relativeFilePath;
     if(relativePath.isDirectory()){
-    	for(File f : relativePath.listFiles()){
-    		if(!f.isHidden() && !f.getName().startsWith(".")){
-    			relativeFilePath = this.getRelativePath(f, this.getWorkingTree().getPath());
-    			list.add(relativeFilePath );
-    		}
-    	}
+        for(File f : relativePath.listFiles()){
+            if(!f.isHidden() && !f.getName().startsWith(".")){
+                relativeFilePath = GitFileSystemObject.getRelativePath(f, this.getWorkingTree().getPath());
+                list.add(relativeFilePath );
+            }
+        }
     }
     else{
-    	
-    	list.add(relativePath);
+        
+        list.add(relativePath);
     }
     // run git-add command
     return gitAdd.add(workingTree.getPath(), null, list);
