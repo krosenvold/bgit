@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -32,8 +33,11 @@ import edu.nyu.cs.javagit.client.cli.ProcessUtilities;
 /**
  * @author Kristian Rosenvold
  */
-public class GitRepositoryTest
-{
+public class GitRepositoryTest {
+
+    private static DirectoryController master;
+    private DirectoryController clone;
+
     private static String getGitHubRepoUrl() {
         return "git://github.com/krosenvold/bgit-unittest.git";
     }
@@ -41,25 +45,33 @@ public class GitRepositoryTest
 
     @BeforeClass
     public static void getFromGitHub() throws IOException, JavaGitException {
-        final File localRepo = getMasterRepoCheckoutDirectory();
+        master = new DirectoryController(Settings.getMasterRepositoryDir());
+        master.clean();
+        final File localRepo = master.getCheckoutDirectory();
         if ( !GitRepository.containsValidRepo(localRepo)){
             GitCloneOptions gitCloneOptions = new GitCloneOptions(false, false, true);
             GitRepository.clone( getGitHubRepoUrl(), localRepo, gitCloneOptions);
         }
     }
 
+    @Before
+    public void createWorkingCopy() {
+        clone = new DirectoryController(Settings.getCloneRepositoryDir());
+        clone.clean();
+    }
 
     @After
     public void deleteWorkingCopy() throws IOException, JavaGitException {
-        deleteDir( getWorkingCopyDir());
+        clone.delete();
+        clone = null;
     }
 
 
     @Test
     public void testClone() throws IOException, JavaGitException {
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
-        
+        File sourceDir = clone.getCheckoutDirectory();
+
         assertFalse( GitRepository.containsValidRepo( sourceDir));
         gitRepository.cloneOrFetch(sourceDir);
         assertTrue( GitRepository.containsValidRepo( sourceDir));
@@ -70,7 +82,7 @@ public class GitRepositoryTest
     @Test
     public void testCloneWithREquestedSha1() throws IOException, JavaGitException {
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
 
         assertFalse( GitRepository.containsValidRepo( sourceDir));
         gitRepository.cloneOrFetch(sourceDir, HardCodedRepo.second_a55e.getSha().getSha());
@@ -87,7 +99,7 @@ public class GitRepositoryTest
     @Test
     public void testCloneThenMoveHeadThenFetch() throws IOException, JavaGitException {
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
 
         assertFalse( GitRepository.containsValidRepo( sourceDir));
         gitRepository.cloneOrFetch(sourceDir);
@@ -107,7 +119,7 @@ public class GitRepositoryTest
     @Test(expected = JavaGitException.class)
     public void testResetWithNonExistantSha() throws IOException, JavaGitException {
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
 
         assertFalse( GitRepository.containsValidRepo( sourceDir));
         gitRepository.cloneOrFetch(sourceDir);
@@ -129,7 +141,7 @@ public class GitRepositoryTest
 
 
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
 
         assertFalse( GitRepository.containsValidRepo( sourceDir));
         gitRepository.cloneOrFetch(sourceDir);
@@ -152,7 +164,7 @@ public class GitRepositoryTest
         List<String> commandLine = Arrays.asList( "git","rebase", "origin/feature2");
 
         @SuppressWarnings("unused")
-		CommandResponse rebase = ProcessUtilities.runCommand(sourceDir, commandLine, rebaseParser);
+        CommandResponse rebase = ProcessUtilities.runCommand(sourceDir, commandLine, rebaseParser);
 
         // Todo: Need to assert the head points to a given commit.
         assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
@@ -165,7 +177,7 @@ public class GitRepositoryTest
     @Test
     public void testCloneThenSeveralBranchChanges() throws IOException, JavaGitException {
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
 
         assertFalse( GitRepository.containsValidRepo( sourceDir));
         gitRepository.cloneOrFetch(sourceDir);
@@ -183,15 +195,10 @@ public class GitRepositoryTest
         assertEquals("Repository should be on feature1 branch", "feature1", gitRepository.gitStatus(sourceDir).getName());
     }
 
-    private File getFreshCheckoutDir() {
-        return getCheckoutDirectory(getFreshWorkingCopyDir());
-    }
-
-
     @Test
     public void testCloneDefault() throws IOException, JavaGitException {
         GitRepository gitRepository = getGitRepository(null);
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
         gitRepository.cloneOrFetch(sourceDir);
         assertEquals("featureDefault", gitRepository.gitStatus(sourceDir).getName());
     }
@@ -303,7 +310,7 @@ public class GitRepositoryTest
     @Test
     public void testCloneNonExistingPrevious() throws IOException, JavaGitException, RepositoryException {
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
 
         gitRepository.cloneOrFetch(sourceDir);
         assertTrue( GitRepository.containsValidRepo( sourceDir));
@@ -316,13 +323,13 @@ public class GitRepositoryTest
     @Test
     public void testgetSha1FromCommitDate() throws IOException, JavaGitException, RepositoryException {
         GitRepository gitRepository = getGitRepository("feature1");
-        File sourceDir = getFreshCheckoutDir();
+        File sourceDir = clone.getCheckoutDirectory();
         gitRepository.cloneOrFetch(sourceDir);
         assertTrue( GitRepository.containsValidRepo( sourceDir));
 
         String commit = gitRepository.getSha1FromCommitDate("Fri Oct 9 15:38:10 2009 +0200", sourceDir);
         assertEquals( "a55e4702a0fdc210eaa17774dddc4890852396a7", commit);
-        
+
         commit = gitRepository.getSha1FromCommitDate("Fri Oct 19 22:38:10 2009 +0200", sourceDir);// Fake
         assertEquals( "84965cc8dfc8af7fca02c78373413aceafc73c2f", commit);
 
@@ -343,79 +350,16 @@ public class GitRepositoryTest
         assertEquals(10, results.size());
     }
 
-    private static File getMasterRepoWorkingDirectory() {
-        File masterRepoDir = new File("masterRepo");
-        ensureDirExists(masterRepoDir);
-        return masterRepoDir;
-    }
-
-    private static File getWorkingCopyDir() {
-        return new File("testRepo");
-    }
-
-    
-    private static File getMasterRepoCheckoutDirectory() {
-        return getMasterRepoCheckoutDirectory(getMasterRepoWorkingDirectory().getPath());
-    }
-    private static File getCWDRelativeMasterRepoCheckoutDirectory() {
-        return getMasterRepoCheckoutDirectory(".." + File.separator + getMasterRepoWorkingDirectory().getPath());
-    }
-    private static File getMasterRepoCheckoutDirectory(String localPart) {
-        try {
-            final File file = new File(localPart + File.separator + GitRepository.getLocalCheckoutSubfolder());
-            ensureDirExists( file);
-            return file;
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private static File getCheckoutDirectory(File workingDirectory){
-        try {
-            return new File(workingDirectory.getCanonicalPath() + File.separator + GitRepository.getLocalCheckoutSubfolder());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static File getFreshWorkingCopyDir() {
-        File workingCopyDir = new File("testRepo");
-        if (workingCopyDir.exists()) deleteDir( workingCopyDir);
-        ensureDirExists(workingCopyDir);
-        return workingCopyDir;
-    }
-
-    private static void ensureDirExists(File workingCopyDir) {
-        if (!workingCopyDir.exists()){
-            //noinspection ResultOfMethodCallIgnored
-            workingCopyDir.mkdir();
-        }
-    }
-
-
-    public static boolean deleteDir(File dir) {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (String child : children) {
-                boolean success = deleteDir(new File(dir, child));
-                if (!success) {
-                    return false;
-                }
-            }
-        }
-        return dir.delete();
-    }
 
      private File getFreshCopyInCheckoutDir(GitRepository gitRepository) throws IOException, JavaGitException {
-        final File directory = getCheckoutDirectory(getFreshWorkingCopyDir());
+        final File directory = clone.getCheckoutDirectory();
         gitRepository.cloneOrFetch( directory);
         return directory;
     }
 
 
     private GitRepository getGitRepository(String remoteBranch) throws IOException {
-        return new GitRepository(getCWDRelativeMasterRepoCheckoutDirectory().getPath(), remoteBranch);
+        return new GitRepository(master.getCheckoutDirectory().getAbsolutePath(), remoteBranch);
     }
 
 

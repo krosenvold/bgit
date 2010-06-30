@@ -20,7 +20,7 @@ public class HardCodedRepo {
 
     public static final CommitDescriptor NONEXISTANT_SHA1 =  new CommitDescriptor(new Sha("046ebe812ad72a76fc35a4f4fb1eb104a4560e55"), "MergeBranchFile3.txt", "Thu Nov 12 21:29:46 2009 +0100", "Thu Nov 12 21:29:46 2009 +0100", COMMIT_2813);
 
-    public static CommitDescriptor getRepoTip(){
+    public static CommitDescriptor getRepoTip(){ 
         return COMMIT_Merge_aBranch_featureDefault;
     }
 
