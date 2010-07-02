@@ -1,11 +1,7 @@
 <atlassian-plugin key="com.atlassian.labs.bamboo.git" name="git-plugin">
     <plugin-info>
-        <description><!-- TODO: add description --> </description>
-        <version>1.0.1</version>
-        <!-- TODO: Add vendor details -->
-        <!--
-        <vendor name="Example Company" url="http://www.example.com"/>
-        -->
+        <description>Bamboo bgit plugin</description>
+        <version>${project.version}</version>
     </plugin-info>
 
 

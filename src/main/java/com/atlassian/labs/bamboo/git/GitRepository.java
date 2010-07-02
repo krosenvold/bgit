@@ -83,9 +83,6 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     // ------------------------------------------------------------------------------------------------- Type Properties
     private String repositoryUrl;
     private String webRepositoryUrl;
-//    private String username;
-//    private String passphrase;
-//    private String webRepositoryUrlRepoName;
     private String remoteBranch;
     private boolean hideAuthorEmail = true;
 
