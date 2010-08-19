@@ -8,7 +8,7 @@ It also works on Windows, but requires cygwin git (not msysgit).
 
 <h1>Mailing list</h2>
 If you're a user you're advised to sign up for the mailing list at
-http://groups.google.com/group/bamboogitplugin
+<a href="http://groups.google.com/group/bamboogitplugin">google groups</a>
 
 We're a reasonably quiet bunch, so don't expect your mailbox to explode
 just because you sign up. Notifications of issues wrt upgrades or important bugs will be announced on the group.
