@@ -93,6 +93,14 @@ able to checkout neither.
 
 <h2>Release notes</h2>
 
+1.2.3
+
+* Tested with bamboo 2.6.2
+* Fix for windows.
+* Version number should be visible in bamboo console; pom version used.
+* Console spamming removed
+
+
 1.2.2 & 1.2.1
 
 Issue 8, 11 and 12 fixed in these two. Time for a binary release ;) 
@@ -175,6 +183,9 @@ CHANGELOG
 - Benjamin Reed (RangerRick)
 - Luke Taylor (tekul)
 - David Matějček (dmatej)
+- Kostas Georgiou (georgiou)
+
+
 
 <h2>Related links</h2>
 <ul>
