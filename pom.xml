@@ -44,6 +44,7 @@
         <url>http://github.com/krosenvold/bgit</url>
     </scm>
 
+
     <repositories>
         <repository>
             <id>atlassian-public</id>
@@ -76,6 +77,20 @@
 
 
     </repositories>
+
+    <distributionManagement>
+      <repository>
+        <id>base26</id>
+        <name>base26</name>
+        <url>http://base26:8081/nexus/content/repositories/base26/</url>
+      </repository>
+      <snapshotRepository>
+        <id>base26snapshot</id>
+        <name>base26snapshot</name>
+        <url>http://base26:8081/nexus/content/repositories/base26snapshot/</url>
+      </snapshotRepository>
+   </distributionManagement>
+
     <pluginRepositories>
         <pluginRepository>
             <id>atlassian-public</id>
