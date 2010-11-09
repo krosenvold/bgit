@@ -95,7 +95,7 @@ able to checkout neither.
 
 1.2.3
 
-* Tested with bamboo 2.6.2
+* Added bamboo 2.7 support
 * Fix for windows.
 * Version number should be visible in bamboo console; pom version used.
 * Console spamming removed

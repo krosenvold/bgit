@@ -116,7 +116,7 @@
 
     <properties>
         <atlassian.plugin.key>com.atlassian.labs.bamboo.git.git-plugin</atlassian.plugin.key>
-        <atlassian.product.version>2.6.2</atlassian.product.version>
+        <atlassian.product.version>2.7</atlassian.product.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
