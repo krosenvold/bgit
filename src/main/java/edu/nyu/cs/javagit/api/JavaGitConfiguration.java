@@ -31,6 +31,17 @@ public final class JavaGitConfiguration {
    */
   private static String gitVersion = null;
 
+  /*
+   * The name for the git executable.
+   */
+  private static String gitExecutable = "git";
+
+  static {
+    if( System.getProperty("os.name").startsWith("Windows") ) {
+      gitExecutable = "git.exe";
+    }
+  }
+
   /**
    * Constructor - private because this is an all-static class.
    */
@@ -73,7 +84,7 @@ public final class JavaGitConfiguration {
       gitPrefix = getGitCommandPrefix();
     }
 
-    String gitCommand = gitPrefix + "git";
+    String gitCommand = gitPrefix + gitExecutable;
     if (!(gitPrefix.equals(""))) {
       // If we've got a full path to the git binary here, ensure it actually exists.
       if (!(new File(gitCommand).exists())) {
@@ -111,7 +122,7 @@ public final class JavaGitConfiguration {
    *         itself.
    */
   public static String getGitCommand() {
-    return getGitCommandPrefix() + "git";
+    return getGitCommandPrefix() + gitExecutable;
   }
 
   /**

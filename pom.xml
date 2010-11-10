@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.atlassian.labs.bamboo.git</groupId>
     <artifactId>git-plugin</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.4-SNAPSHOT</version>
 
     <name>Bamboo Git plugin</name>
     <packaging>jar</packaging>
@@ -29,8 +29,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.5</source>
+                    <target>1.5</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -43,6 +43,7 @@
         <developerConnection>scm:git:ssh://git@github.com/krosenvold/bgit.git</developerConnection>
         <url>http://github.com/krosenvold/bgit</url>
     </scm>
+
 
     <repositories>
         <repository>
@@ -76,6 +77,20 @@
 
 
     </repositories>
+
+    <distributionManagement>
+      <repository>
+        <id>base26</id>
+        <name>base26</name>
+        <url>http://base26:8081/nexus/content/repositories/base26/</url>
+      </repository>
+      <snapshotRepository>
+        <id>base26snapshot</id>
+        <name>base26snapshot</name>
+        <url>http://base26:8081/nexus/content/repositories/base26snapshot/</url>
+      </snapshotRepository>
+   </distributionManagement>
+
     <pluginRepositories>
         <pluginRepository>
             <id>atlassian-public</id>
@@ -116,7 +131,7 @@
 
     <properties>
         <atlassian.plugin.key>com.atlassian.labs.bamboo.git.git-plugin</atlassian.plugin.key>
-        <atlassian.product.version>2.6.1</atlassian.product.version>
+        <atlassian.product.version>2.7</atlassian.product.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

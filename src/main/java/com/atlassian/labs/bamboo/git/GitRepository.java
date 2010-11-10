@@ -684,7 +684,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
 
     public String getSubstitutedRepositoryUrl()
     {
-        return variableSubstitutionBean.substituteBambooVariables(repositoryUrl);
+        return getVariableSubstitutionBean().substituteBambooVariables(repositoryUrl);
     }
 
 

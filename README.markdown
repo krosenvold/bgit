@@ -2,11 +2,12 @@
 
 This plugin provides Git support to the excellent Atlassian Bamboo continous integration server.
 
-It is compatible with Bamboo 2.2.x and above, including 2.5.
+It is compatible with Bamboo 2.2.x and above, including 2.7.
 
 It also works on Windows, but requires cygwin git (not msysgit).
 
-<h1>Mailing list</h2>
+<h2>Mailing list</h2>
+
 If you're a user you're advised to sign up for the mailing list at
 <a href="http://groups.google.com/group/bamboogitplugin">google groups</a>
 
@@ -93,6 +94,14 @@ able to checkout neither.
 
 <h2>Release notes</h2>
 
+1.2.3
+
+* Added bamboo 2.7 support
+* Fix for windows.
+* Version number should be visible in bamboo console; pom version used.
+* Console spamming removed
+
+
 1.2.2 & 1.2.1
 
 Issue 8, 11 and 12 fixed in these two. Time for a binary release ;) 
@@ -175,6 +184,9 @@ CHANGELOG
 - Benjamin Reed (RangerRick)
 - Luke Taylor (tekul)
 - David Matějček (dmatej)
+- Kostas Georgiou (georgiou)
+
+
 
 <h2>Related links</h2>
 <ul>
