@@ -26,7 +26,7 @@ just because you sign up. Notifications of issues wrt upgrades or important bugs
 <h2>RELEASES</h2>
 
 The current release is 1.2.2 Only the latest release is available for
-<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.2.2.jar">download</a>. Older releases will have to be built from
+<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.2.3.jar">download</a>. Older releases will have to be built from
 source, which is really easy.
 
 <h3>Branch/Release policy</h3>
