@@ -4,6 +4,9 @@ This plugin provides Git support to the excellent Atlassian Bamboo continous int
 
 It is compatible with Bamboo 2.2.x and above, including 2.7.
 
+Version of 1.2.4 is tested with 2.7.3.
+Version 1.2.3 works only up to 2.7.1.
+
 It also works on Windows, but requires cygwin git (not msysgit).
 
 <h2>Mailing list</h2>
