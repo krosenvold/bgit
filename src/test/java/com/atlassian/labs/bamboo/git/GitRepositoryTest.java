@@ -359,7 +359,10 @@ public class GitRepositoryTest {
 
 
     private GitRepository getGitRepository(String remoteBranch) throws IOException {
-        return new GitRepository(master.getCheckoutDirectory().getAbsolutePath(), remoteBranch);
+      GitRepository repo = new GitRepository();
+      repo.setRepositoryUrl(master.getCheckoutDirectory().getAbsolutePath());
+      repo.setRemoteBranch(remoteBranch);
+      return repo;
     }
 
 

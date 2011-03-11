@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -25,17 +26,17 @@ import com.atlassian.bamboo.commit.CommitFile;
 import com.atlassian.bamboo.commit.CommitFileImpl;
 import com.atlassian.bamboo.commit.CommitImpl;
 import com.atlassian.bamboo.repository.AbstractRepository;
-import com.atlassian.bamboo.repository.InitialBuildAwareRepository;
+import com.atlassian.bamboo.repository.CustomVariableProviderRepository;
 import com.atlassian.bamboo.repository.MutableQuietPeriodAwareRepository;
 import com.atlassian.bamboo.repository.QuietPeriodHelper;
 import com.atlassian.bamboo.repository.Repository;
 import com.atlassian.bamboo.repository.RepositoryException;
+import com.atlassian.bamboo.template.TemplateRenderer;
 import com.atlassian.bamboo.utils.ConfigUtils;
 import com.atlassian.bamboo.utils.error.ErrorCollection;
 import com.atlassian.bamboo.v2.build.BuildChanges;
 import com.atlassian.bamboo.v2.build.BuildChangesImpl;
 import com.atlassian.bamboo.v2.build.BuildContext;
-import com.atlassian.bamboo.v2.build.repository.RepositoryV2;
 import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
 
 import edu.nyu.cs.javagit.api.JavaGitException;
@@ -58,24 +59,31 @@ import edu.nyu.cs.javagit.client.cli.CliGitClone;
 import edu.nyu.cs.javagit.client.cli.CliGitFetch;
 import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
 
-public class GitRepository extends AbstractRepository implements InitialBuildAwareRepository, MutableQuietPeriodAwareRepository, RepositoryV2
+import com.google.common.collect.Maps;
+
+
+public class GitRepository extends AbstractRepository implements MutableQuietPeriodAwareRepository, CustomVariableProviderRepository
 {
     private static final Log log = LogFactory.getLog(GitRepository.class);
 
     // ------------------------------------------------------------------------------------------------------- Constants
-    public static final String NAME = "Git";
-
-    private static final String REPO_PREFIX = "repository.git.";
-    public static final String GIT_REPO_URL = REPO_PREFIX + "repositoryUrl";
-    public static final String GIT_REMOTE_BRANCH = REPO_PREFIX + "remoteBranch";
 
 
+    private static final String NAME = "BGit (GitHub - dmatej)";
+
+    private static final String OLD_REPO_PREFIX = "repository.git.";
+    private static final String REPO_PREFIX = "repository.github.git.";
+    private static final String GIT_REPO_URL = REPO_PREFIX + "repositoryUrl";
+    private static final String GIT_REMOTE_BRANCH = REPO_PREFIX + "remoteBranch";
     private static final String USE_EXTERNALS = REPO_PREFIX + "useExternals";
+    private static final String TEMPORARY_GIT_ADVANCED = "temporary. " + REPO_PREFIX + "advanced";
+    private static final String EXTERNAL_PATH_MAPPINGS = REPO_PREFIX + "externalsToRevisionMappings";
 
-    private static final String TEMPORARY_GIT_ADVANCED = "temporary.git.advanced";
-
-
-    private static final String EXTERNAL_PATH_MAPPINGS2 = REPO_PREFIX + "externalsToRevisionMappings";
+    private static final String OLD_GIT_REPO_URL = OLD_REPO_PREFIX + "repositoryUrl";
+    private static final String OLD_GIT_REMOTE_BRANCH = OLD_REPO_PREFIX + "remoteBranch";
+    private static final String OLD_USE_EXTERNALS = OLD_REPO_PREFIX + "useExternals";
+    private static final String OLD_EXTERNAL_PATH_MAPPINGS = OLD_REPO_PREFIX + "externalsToRevisionMappings";
+    private static final String OLD_TEMPORARY_GIT_ADVANCED = "temporary. " + OLD_REPO_PREFIX + "advanced";
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}");
 
@@ -87,19 +95,13 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     private boolean hideAuthorEmail = true;
 
     // Quiet Period
+    private final QuietPeriodHelper oldQuietPeriodHelper = new QuietPeriodHelper(OLD_REPO_PREFIX);
     private final QuietPeriodHelper quietPeriodHelper = new QuietPeriodHelper(REPO_PREFIX);
     private boolean quietPeriodEnabled = false;
     private int quietPeriod = QuietPeriodHelper.DEFAULT_QUIET_PERIOD;
     private int maxRetries = QuietPeriodHelper.DEFAULT_MAX_RETRIES;
     private static final long serialVersionUID = -5031786714275269805L;
 
-    public GitRepository() {
-    }
-
-    public GitRepository(String repositoryUrl, String remoteBranch) {
-        this.repositoryUrl = repositoryUrl;
-        this.remoteBranch = remoteBranch;
-    }
 
     /**
      * Maps the path to the latest checked revision
@@ -168,7 +170,6 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         log.debug("retrieving source code");
         try
         {
-                getSubstitutedRepositoryUrl();
                 File sourceDir = getCheckoutDirectory(planKey); // sourceedir = xxx/checkout
                 cloneOrFetch(sourceDir, vcsRevisionKey);
                 submodule_update(sourceDir);
@@ -389,6 +390,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     public void addDefaultValues( @NotNull BuildConfiguration buildConfiguration)
     {
         super.addDefaultValues(buildConfiguration);
+        oldQuietPeriodHelper.addDefaultValues(buildConfiguration);
         quietPeriodHelper.addDefaultValues(buildConfiguration);
     }
 
@@ -530,13 +532,14 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         return remoteBranch != null;
     }
 
+    @Override
     @NotNull public ErrorCollection validate( @NotNull BuildConfiguration buildConfiguration)
     {
         ErrorCollection errorCollection = super.validate(buildConfiguration);
 
         String repoUrl = buildConfiguration.getString(GIT_REPO_URL);
         repoUrl = variableSubstitutionBean.substituteBambooVariables(repoUrl);
-        if (StringUtils.isEmpty(repoUrl))
+        if (StringUtils.isBlank(repoUrl))
         {
             errorCollection.addError(GIT_REPO_URL, "Please specify the build's Git Repository");
         }
@@ -546,7 +549,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         }
         
         String remoBranch = buildConfiguration.getString(GIT_REMOTE_BRANCH);
-        if (StringUtils.isEmpty(remoBranch))
+        if (StringUtils.isBlank(remoBranch))
         {
             errorCollection.addError(GIT_REMOTE_BRANCH, "Please specify the remote branch that will be checked out");
         }
@@ -562,6 +565,43 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         return errorCollection;
     }
 
+
+    private String getProperty(HierarchicalConfiguration config, String key, String oldKey) {
+        log.trace("getProperty(config, key=" + key + ", oldKey=" + oldKey + ")");
+
+        String value = config.getString(key);
+        if (!StringUtils.isBlank(value)) {
+            log.trace("Found new value=" + value);
+            return value;
+        }
+
+        value = config.getString(oldKey);
+        log.trace("Found old value=" + value);
+        return value;
+    }
+
+
+    private void loadConfiguration(HierarchicalConfiguration config) {
+
+        log.info("loadConfiguration(buildConfiguration)");
+        if (log.isDebugEnabled() && config != null) {
+            log.debug("configuration properties:\n" + toString(config));
+        }
+
+        setRepositoryUrl(getProperty(config, GIT_REPO_URL, OLD_GIT_REPO_URL));
+        setRemoteBranch(getProperty(config, GIT_REMOTE_BRANCH, OLD_GIT_REMOTE_BRANCH));
+
+        Map<String, String> stringMaps = ConfigUtils.getMapFromConfiguration(EXTERNAL_PATH_MAPPINGS, config);
+        if (stringMaps.isEmpty()) {
+            stringMaps = ConfigUtils.getMapFromConfiguration(OLD_EXTERNAL_PATH_MAPPINGS, config);
+        }
+        externalPathRevisionMappings = ConfigUtils.toLongMap(stringMaps);
+
+        quietPeriodHelper.populateFromConfig(config, this);
+        if (!isQuietPeriodEnabled()) {
+            oldQuietPeriodHelper.populateFromConfig(config, this);
+        }
+    }
 
     public boolean isRepositoryDifferent(@NotNull Repository repository)
     {
@@ -581,11 +621,18 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
 
     public void prepareConfigObject( @NotNull BuildConfiguration buildConfiguration)
     {
+        // 3.0.1 - does nothing
+        super.prepareConfigObject(buildConfiguration);
+
         // Disabling advanced will clear all advanced
-        if (!buildConfiguration.getBoolean(TEMPORARY_GIT_ADVANCED, false))
+        boolean advanced = buildConfiguration.getBoolean(TEMPORARY_GIT_ADVANCED, false);
+        boolean oldAdvanced = buildConfiguration.getBoolean(OLD_TEMPORARY_GIT_ADVANCED, false);;
+        if (!advanced && !oldAdvanced )
         {
             quietPeriodHelper.clearFromBuildConfiguration(buildConfiguration);
+            oldQuietPeriodHelper.clearFromBuildConfiguration(buildConfiguration);
             buildConfiguration.clearTree(USE_EXTERNALS);
+            buildConfiguration.clearTree(OLD_USE_EXTERNALS);
         }
     }
 
@@ -593,13 +640,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     {
         super.populateFromConfig(config);
 
-        setRepositoryUrl(config.getString(GIT_REPO_URL));
-        setRemoteBranch(config.getString(GIT_REMOTE_BRANCH));
-
-        final Map<String, String> stringMaps = ConfigUtils.getMapFromConfiguration(EXTERNAL_PATH_MAPPINGS2, config);
-        externalPathRevisionMappings = ConfigUtils.toLongMap(stringMaps);
-
-        quietPeriodHelper.populateFromConfig(config, this);
+        loadConfiguration(config);
     }
 
     
@@ -610,7 +651,7 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
         configuration.setProperty(GIT_REMOTE_BRANCH, getRemoteBranch());
 
         final Map<String, String> stringMap = ConfigUtils.toStringMap(externalPathRevisionMappings);
-        ConfigUtils.addMapToBuilConfiguration(EXTERNAL_PATH_MAPPINGS2, stringMap, configuration);
+        ConfigUtils.addMapToBuilConfiguration(EXTERNAL_PATH_MAPPINGS, stringMap, configuration);
 
         // Quiet period
         quietPeriodHelper.toConfiguration(configuration, this);
@@ -624,8 +665,10 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
     public boolean isAdvancedOptionEnabled( BuildConfiguration buildConfiguration)
     {
         final boolean useExternals = buildConfiguration.getBoolean(USE_EXTERNALS, false);
+        final boolean oldUseExternals = buildConfiguration.getBoolean(OLD_USE_EXTERNALS, false);
         final boolean quietPeriodEnabled = quietPeriodHelper.isEnabled(buildConfiguration);
-        return useExternals || quietPeriodEnabled;
+        final boolean oldQuietPeriodEnabled = oldQuietPeriodHelper.isEnabled(buildConfiguration);
+        return useExternals || oldUseExternals || quietPeriodEnabled || oldQuietPeriodEnabled;
     }
 
     // -------------------------------------------------------------------------------------- Basic accessors & mutators
@@ -772,5 +815,26 @@ public class GitRepository extends AbstractRepository implements InitialBuildAwa
                 .append(getRepositoryUrl(), rhs.getRepositoryUrl())
                 .append(getTriggerIpAddress(), rhs.getTriggerIpAddress())
                 .isEquals();
+    }
+    /**
+     * @return empty map
+     */
+    public Map<String, String> getCustomVariables() {
+      Map<String, String> variables = Maps.newHashMap();
+      variables.put(GIT_REPO_URL, getRepositoryUrl());
+      variables.put(GIT_REMOTE_BRANCH, getRemoteBranch());
+      return variables;
+    }
+
+    private String toString(HierarchicalConfiguration config) {
+        StringBuilder b = new StringBuilder(2048);
+        for (Iterator<?> iterator = config.getKeys(); iterator.hasNext();) {
+          String key = (String) iterator.next();
+          b.append(key).append('=').append(config.getProperty(key));
+          if (iterator.hasNext()) {
+            b.append("  \n");
+          }
+        }
+        return b.toString();
     }
 }

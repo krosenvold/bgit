@@ -1,9 +1,9 @@
-[@ww.textfield labelKey='Repository' name='repository.git.repositoryUrl' required='true' /]
-[@ww.textfield labelKey='Remote branch to track' name='repository.git.remoteBranch' required='true' /]
-
+[#-- @ftlvariable name="repository" type="com.atlassian.labs.bamboo.git.GitRepository" --]
+[@ui.bambooSection]
+[@ww.textfield label='Repository URL' name='repository.github.git.repositoryUrl' required='true' /]
+[@ww.textfield label='Remote branch' name='repository.github.git.remoteBranch' required='true' /]
 
 [@ui.bambooSection titleKey='repository.advanced.option']
-
 [@ww.checkbox labelKey='repository.advanced.option.enable' toggle='true' name='temporary.git.advanced' value='${repository.isAdvancedOptionEnabled(buildConfiguration)?string}' /]
 [@ui.bambooSection dependsOn='temporary.git.advanced' showOn='true']
     [@ww.checkbox labelKey='repository.common.quietPeriod.enabled' toggle='true' name='repository.git.quietPeriod.enabled' /]
@@ -13,5 +13,4 @@
     [/@ui.bambooSection]
 [/@ui.bambooSection]
 [/@ui.bambooSection]
-
-
+[/@ui.bambooSection]

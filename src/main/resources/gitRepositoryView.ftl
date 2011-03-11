@@ -1,7 +1,7 @@
-[@ww.label labelKey='repository.git.repository' name='build.buildDefinition.repository.repositoryUrl' /]
-[@ww.label labelKey='repository.git.remoteBranch' name='build.buildDefinition.repository.remoteBranch' /]
+[@ww.label label='Repository URL' value='${plan.buildDefinition.repository.repositoryUrl}' /]
+[@ww.label label='Remote branch' value='${plan.buildDefinition.repository.remoteBranch}' /]
 
-[#if repository.quietPeriodEnabled]
-    [@ww.label labelKey='repository.common.quietPeriod.period' name='build.buildDefinition.repository.quietPeriod' hideOnNull='true' /]
-    [@ww.label labelKey='repository.common.quietPeriod.maxRetries' name='build.buildDefinition.repository.maxRetries' hideOnNull='true' /]
+[#if plan.buildDefinition.repository.quietPeriodEnabled]
+    [@ww.label labelKey='repository.common.quietPeriod.period' value='${plan.buildDefinition.repository.quietPeriod}' hideOnNull='true' /]
+    [@ww.label labelKey='repository.common.quietPeriod.maxRetries' value='${plan.buildDefinition.repository.maxRetries}' hideOnNull='true' /]
 [/#if]
