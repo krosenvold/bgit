@@ -154,11 +154,7 @@ public class GitRepository extends AbstractRepository implements MutableQuietPer
     @Override
     public File getSourceCodeDirectory(@NotNull String s) throws RepositoryException {
         File codeDirectory = super.getSourceCodeDirectory(s);
-        try {
-            return new File(codeDirectory.getCanonicalPath() + File.separator + "checkout");  
-        } catch (IOException e) {
-            throw new RepositoryException("getSourceCodeDirectory", e);
-        }
+        return new File(codeDirectory, "checkout");
     }
 
     // Todo: Make sure we use vcsRevisionKey in cloneOrFetch
@@ -501,8 +497,8 @@ public class GitRepository extends AbstractRepository implements MutableQuietPer
     }
 
 
-    static boolean containsValidRepo(File sourceDir) throws IOException {
-        return sourceDir.exists() &&  (new File( sourceDir.getCanonicalPath() + File.separator + ".git").exists() || new File( sourceDir.getCanonicalPath() + File.separator + "HEAD").exists()); 
+    protected static boolean containsValidRepo(File sourceDir) throws IOException {
+        return sourceDir.exists() &&  (new File(sourceDir, ".git").exists() || new File(sourceDir, "HEAD").exists());
     }
 
     boolean isOnBranch(File sourceDir, Ref branchName) throws IOException, JavaGitException {
