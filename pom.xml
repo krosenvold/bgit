@@ -41,9 +41,9 @@
 
 
     <scm>
-        <connection>scm:git:git://github.com/krosenvold/bgit.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/krosenvold/bgit.git</developerConnection>
-        <url>http://github.com/krosenvold/bgit</url>
+        <connection>scm:git:git://github.com/dmatej/bgit.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/dmatej/bgit.git</developerConnection>
+        <url>http://github.com/dmatej/bgit</url>
     </scm>
 
 
