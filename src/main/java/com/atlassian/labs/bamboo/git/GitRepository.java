@@ -38,27 +38,25 @@ import com.atlassian.bamboo.v2.build.BuildChanges;
 import com.atlassian.bamboo.v2.build.BuildChangesImpl;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
-
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.GitBranch;
-import edu.nyu.cs.javagit.api.commands.GitBranchOptions;
-import edu.nyu.cs.javagit.api.commands.GitBranchResponse;
-import edu.nyu.cs.javagit.api.commands.GitCheckout;
-import edu.nyu.cs.javagit.api.commands.GitCheckoutOptions;
-import edu.nyu.cs.javagit.api.commands.GitCloneOptions;
-import edu.nyu.cs.javagit.api.commands.GitLog;
-import edu.nyu.cs.javagit.api.commands.GitLogOptions;
-import edu.nyu.cs.javagit.api.commands.GitLogResponse;
-import edu.nyu.cs.javagit.api.commands.GitReset;
-import edu.nyu.cs.javagit.api.commands.GitResetOptions;
-import edu.nyu.cs.javagit.api.commands.GitStatus;
-import edu.nyu.cs.javagit.api.commands.GitStatusOptions;
-import edu.nyu.cs.javagit.api.commands.GitStatusResponse;
-import edu.nyu.cs.javagit.client.cli.CliGitClone;
-import edu.nyu.cs.javagit.client.cli.CliGitFetch;
-import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
-
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.JavaGitException;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.Ref;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitBranch;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitBranchOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitBranchResponse;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitCheckout;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitCheckoutOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitCloneOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitLog;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitLogOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitLogResponse;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitReset;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitResetOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitStatus;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitStatusOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitStatusResponse;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.client.cli.CliGitClone;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.client.cli.CliGitFetch;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
 import com.google.common.collect.Maps;
 
 

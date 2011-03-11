@@ -2,7 +2,7 @@ package com.atlassian.labs.bamboo.git.model;
 
 import com.atlassian.bamboo.commit.Commit;
 import com.atlassian.bamboo.commit.CommitFile;
-import edu.nyu.cs.javagit.api.Ref;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.Ref;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -17,18 +17,18 @@ import org.junit.Test;
 
 import com.atlassian.bamboo.commit.Commit;
 import com.atlassian.bamboo.repository.RepositoryException;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.JavaGitException;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.Ref;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.CommandResponse;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitCloneOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitReset;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitResetOptions;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.client.cli.IParser;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.client.cli.ProcessUtilities;
 import com.atlassian.labs.bamboo.git.model.CommitDescriptor;
 import com.atlassian.labs.bamboo.git.model.HardCodedRepo;
 import com.atlassian.labs.bamboo.git.model.Sha;
 
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.CommandResponse;
-import edu.nyu.cs.javagit.api.commands.GitCloneOptions;
-import edu.nyu.cs.javagit.api.commands.GitReset;
-import edu.nyu.cs.javagit.api.commands.GitResetOptions;
-import edu.nyu.cs.javagit.client.cli.IParser;
-import edu.nyu.cs.javagit.client.cli.ProcessUtilities;
 
 /**
  * @author Kristian Rosenvold
