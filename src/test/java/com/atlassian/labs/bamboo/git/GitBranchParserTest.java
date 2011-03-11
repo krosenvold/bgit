@@ -16,6 +16,7 @@ import static junit.framework.Assert.assertEquals;
  * @author <a href="mailto:kristian@zenior no">Kristian Rosenvold</a>
  */
 public class GitBranchParserTest {
+
     @Test
     public void testGit1633() throws JavaGitException {
         String branchOutput = "* (no branch)\n" +
@@ -32,7 +33,8 @@ public class GitBranchParserTest {
         verifyBranchParse( branchOutput, 8);
 
     }
-    
+
+
     @Test
     public void testGit166() throws JavaGitException {
         String branchOutput = "* featureDefault\n" +
@@ -44,6 +46,7 @@ public class GitBranchParserTest {
                 "  remotes/origin/master";
         verifyBranchParse(branchOutput, 7);
     }
+
 
     private void verifyBranchParse(String branchOutput, int expected) throws JavaGitException {
         CliGitBranch.GitBranchParser parser = new CliGitBranch.GitBranchParser();
