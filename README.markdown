@@ -98,6 +98,7 @@ able to checkout neither.
 <h2>Release notes</h2>
 
 1.3-dm
+
 * Big refactoring
 * Changes plugin shortkey in settings
 * Custom plugin name
