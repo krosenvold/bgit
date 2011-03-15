@@ -2,8 +2,10 @@ package com.atlassian.labs.bamboo.git;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.lang.StringUtils;
@@ -35,11 +37,9 @@ import com.google.common.collect.Maps;
 public class GitRepositoryPlugin extends AbstractRepository implements MutableQuietPeriodAwareRepository,
         CustomVariableProviderRepository {
 
-    private final Log log = LogFactory.getLog(GitRepositoryPlugin.class);
+    private static final Log log = LogFactory.getLog(GitRepositoryPlugin.class);
 
     private static final long serialVersionUID = -5031786714275269805L;
-
-    private static final String NAME = "BGit (GitHub - dmatej)";
 
     /**
      * Plugin keys in conflict with the Atlassian GIT plugin, but may be used in saved configuration.
@@ -58,10 +58,43 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
     private static final String FULL_KEY_REMOTE_BRANCH = PLUGIN_PREFIX + REMOTE_BRANCH;
     private static final String FULL_KEY_TEMPORARY_GIT_ADVANCED = TEMPORARY_PREFIX + SHORTKEY + ".advanced";
 
+    private static final String PLUGIN_NAME;
+
     // Quiet Period
     private final QuietPeriodHelper quietPeriodHelper = new QuietPeriodHelper(PLUGIN_PREFIX);
 
     private RepositorySettings settings = new RepositorySettings();
+
+
+    static {
+        Properties props = loadPluginProperties();
+        PLUGIN_NAME = props.getProperty("plugin.name", "BGit");
+        // TODO ... deprecated shortkeys? shortkey?
+    }
+
+
+    private static Properties loadPluginProperties() {
+        InputStream input = null;
+        Properties props = null;
+        try {
+            input = GitRepositoryPlugin.class.getResourceAsStream("bgit.properties");
+            props = new Properties();
+            props.load(input);
+            return props;
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot load bgit.properties!", e);
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    // should not never occure
+                    log.warn(e.getMessage(), e);
+                }
+            }
+        }
+    }
+
 
     /**
      * Used by central bamboo server to determine changes.
@@ -292,7 +325,7 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
      */
     @NotNull
     public String getName() {
-        return NAME;
+        return PLUGIN_NAME;
     }
 
 
