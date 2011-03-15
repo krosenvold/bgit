@@ -4,9 +4,9 @@ This plugin provides Git support to the excellent Atlassian Bamboo continous int
 
 It is compatible with Bamboo 3.x and above.
 
-Version of 1.3-dm is tested with 3.0.1
-Version of 1.2.4 is tested with 2.7.3.
-Version 1.2.3 works only up to 2.7.1.
+* Version of 1.3-dm is tested with 3.0.1
+* Version of 1.2.4 is tested with 2.7.3.
+* Version 1.2.3 works only up to 2.7.1.
 
 It also works on Windows, but requires cygwin git (not msysgit).
 
@@ -100,7 +100,7 @@ able to checkout neither.
 1.3-dm
 
 * Big refactoring
-* Changes plugin shortkey in settings
+* Changed plugin shortkey in settings
 * Custom plugin name
 * Fixed property collision with the new Atlassian GIT plugin
 * Better logging
