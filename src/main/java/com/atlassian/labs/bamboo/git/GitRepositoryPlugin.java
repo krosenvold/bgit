@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.atlassian.bamboo.repository.AbstractRepository;
 import com.atlassian.bamboo.repository.CustomVariableProviderRepository;
-import com.atlassian.bamboo.repository.MutableQuietPeriodAwareRepository;
+import com.atlassian.bamboo.repository.QuietPeriodAwareRepository;
 import com.atlassian.bamboo.repository.QuietPeriodHelper;
 import com.atlassian.bamboo.repository.Repository;
 import com.atlassian.bamboo.repository.RepositoryException;
@@ -34,7 +34,7 @@ import com.google.common.collect.Maps;
  * Bamboo GIT repository plugin implementation.
  * This is not Atlassian's implementation and it is not supported by their developers!
  */
-public class GitRepositoryPlugin extends AbstractRepository implements MutableQuietPeriodAwareRepository,
+public class GitRepositoryPlugin extends AbstractRepository implements QuietPeriodAwareRepository,
         CustomVariableProviderRepository {
 
     private static final Log log = LogFactory.getLog(GitRepositoryPlugin.class);
@@ -48,7 +48,6 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
     private static final String SHORTKEY = "github-git";
 
     private static final String REPOSITORY_PREFIX = "repository.";
-    private static final String TEMPORARY_PREFIX = "temporary.";
     private static final String PLUGIN_PREFIX = REPOSITORY_PREFIX + SHORTKEY + ".";
 
     private static final String REPOSITORY_URL = "repositoryUrl";
@@ -56,7 +55,6 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
 
     private static final String FULL_KEY_REPOSITORY_URL = PLUGIN_PREFIX + REPOSITORY_URL;
     private static final String FULL_KEY_REMOTE_BRANCH = PLUGIN_PREFIX + REMOTE_BRANCH;
-    private static final String FULL_KEY_TEMPORARY_GIT_ADVANCED = TEMPORARY_PREFIX + SHORTKEY + ".advanced";
 
     private static final String PLUGIN_NAME;
 
@@ -151,14 +149,6 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
     }
 
 
-    @Override
-    public void addDefaultValues(@NotNull BuildConfiguration buildConfiguration) {
-        log.trace("addDefaultValues(buildConfiguration)");
-        super.addDefaultValues(buildConfiguration);
-        quietPeriodHelper.addDefaultValues(buildConfiguration);
-    }
-
-
     /**
      * Validates settings from an edit page
      */
@@ -173,7 +163,7 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
         ErrorCollection errorCollection = super.validate(buildConfiguration);
 
         String repoUrl = buildConfiguration.getString(FULL_KEY_REPOSITORY_URL);
-        repoUrl = getVariableSubstitutionBean().substituteBambooVariables(repoUrl);
+        repoUrl = customVariableContext.substituteString(repoUrl);
         if (StringUtils.isBlank(repoUrl)) {
             errorCollection.addError(FULL_KEY_REPOSITORY_URL, "Please specify the build's Git Repository");
         } else {
@@ -204,27 +194,6 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
 
 
     /**
-     * Do any preprocessing work before validation occurs.
-     *
-     * @param buildConfiguration - @NotNull
-     */
-    @Override
-    public void prepareConfigObject(@NotNull BuildConfiguration buildConfiguration) {
-        log.debug("prepareConfigObject(buildConfiguration)");
-
-        // 3.0.1 - does nothing
-        super.prepareConfigObject(buildConfiguration);
-
-        // Disabling advanced will clear all advanced
-        boolean advanced = buildConfiguration.getBoolean(FULL_KEY_TEMPORARY_GIT_ADVANCED, false);
-
-        if (!advanced) {
-            this.quietPeriodHelper.clearFromBuildConfiguration(buildConfiguration);
-        }
-    }
-
-
-    /**
      * Loads the configuration (persisted or changed via the plan configuration)
      */
     @Override
@@ -244,12 +213,12 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
         if (PLUGIN_PREFIX.equals(prefix)) {
             setRepositoryUrl(config.getString(FULL_KEY_REPOSITORY_URL));
             setRemoteBranch(config.getString(FULL_KEY_REMOTE_BRANCH));
-            this.quietPeriodHelper.populateFromConfig(config, this);
+            this.quietPeriodHelper.populateFromConfig(config);
         } else {
             setRepositoryUrl(config.getString(prefix + REPOSITORY_URL));
             setRemoteBranch(config.getString(prefix + REMOTE_BRANCH));
             QuietPeriodHelper deprecHelper = new QuietPeriodHelper(prefix);
-            deprecHelper.populateFromConfig(config, this);
+            deprecHelper.populateFromConfig(config);
         }
     }
 
@@ -302,7 +271,7 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
         configuration.setProperty(FULL_KEY_REMOTE_BRANCH, getRemoteBranch());
 
         // Quiet period
-        this.quietPeriodHelper.toConfiguration(configuration, this);
+        this.quietPeriodHelper.toConfiguration(configuration);
         return configuration;
     }
 
@@ -372,6 +341,7 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
     }
 
 
+    @Override
     public boolean isQuietPeriodEnabled() {
         return this.settings.isQuietPeriodEnabled();
     }
@@ -392,6 +362,7 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
     }
 
 
+    @Override
     public int getQuietPeriod() {
         return this.settings.getQuietPeriod();
     }
@@ -403,6 +374,7 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
     }
 
 
+    @Override
     public int getMaxRetries() {
         return this.settings.getMaxRetries();
     }
@@ -436,9 +408,6 @@ public class GitRepositoryPlugin extends AbstractRepository implements MutableQu
     }
 
 
-    /**
-     * @return empty map
-     */
     public Map<String, String> getCustomVariables() {
         Map<String, String> variables = Maps.newHashMap();
         variables.put(FULL_KEY_REPOSITORY_URL, getRepositoryUrl());
