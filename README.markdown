@@ -4,6 +4,7 @@ This plugin provides Git support to the excellent Atlassian Bamboo continous int
 
 It is compatible with Bamboo 3.x and above.
 
+* Version of 1.4-dm is tested with 3.2.1
 * Version of 1.3-dm is tested with 3.0.1
 * Version of 1.2.4 is tested with 2.7.3.
 * Version 1.2.3 works only up to 2.7.1.
@@ -29,8 +30,9 @@ just because you sign up. Notifications of issues wrt upgrades or important bugs
 
 <h2>RELEASES</h2>
 
-The current release is 1.3-dm Only the latest release is available for
-<a href="https://github.com/downloads/dmatej/bgit/git-plugin-1.3-dm.jar">download</a>.
+The current release compatible with Bamboo 3.2 is 1.4-dm: <a href="https://github.com/downloads/dmatej/bgit/git-plugin-1.4-dm.jar">download</a>.
+
+The release compatible with Bamboo 3.0 is 1.3-dm: <a href="https://github.com/downloads/dmatej/bgit/git-plugin-1.3-dm.jar">download</a>.
 
 <h3>Branch/Release policy</h3>
 
@@ -96,6 +98,10 @@ shell script (running as the same user) can pull from your repo. If it can't the
 able to checkout neither.
 
 <h2>Release notes</h2>
+
+1.4-dm
+
+* Support for Bamboo 3.2
 
 1.3-dm
 
