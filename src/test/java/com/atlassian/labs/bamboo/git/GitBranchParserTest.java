@@ -1,10 +1,11 @@
 package com.atlassian.labs.bamboo.git;
 
-import edu.nyu.cs.javagit.api.JavaGitException;
-import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.GitBranchResponse;
-import edu.nyu.cs.javagit.client.cli.CliGitBranch;
 import org.junit.Test;
+
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.JavaGitException;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.Ref;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.api.commands.GitBranchResponse;
+import com.atlassian.labs.bamboo.git.edu.nyu.cs.javagit.client.cli.CliGitBranch;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import static junit.framework.Assert.assertEquals;
  * @author <a href="mailto:kristian@zenior no">Kristian Rosenvold</a>
  */
 public class GitBranchParserTest {
+
     @Test
     public void testGit1633() throws JavaGitException {
         String branchOutput = "* (no branch)\n" +
@@ -31,7 +33,8 @@ public class GitBranchParserTest {
         verifyBranchParse( branchOutput, 8);
 
     }
-    
+
+
     @Test
     public void testGit166() throws JavaGitException {
         String branchOutput = "* featureDefault\n" +
@@ -43,6 +46,7 @@ public class GitBranchParserTest {
                 "  remotes/origin/master";
         verifyBranchParse(branchOutput, 7);
     }
+
 
     private void verifyBranchParse(String branchOutput, int expected) throws JavaGitException {
         CliGitBranch.GitBranchParser parser = new CliGitBranch.GitBranchParser();

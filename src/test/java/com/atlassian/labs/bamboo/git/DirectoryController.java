@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Creates, deletes, cleans test directories.
+ *
  * @author David Matějček
  */
 public class DirectoryController {
@@ -19,11 +20,13 @@ public class DirectoryController {
     private final File mainDirectory;
     private final File checkoutDirectory;
 
+
     public DirectoryController(String mainDirectory) {
         LOG.debug("DirectoryController(mainDirectory={})", mainDirectory);
         this.mainDirectory = new File(mainDirectory);
         this.checkoutDirectory = new File(this.mainDirectory, "checkout");
     }
+
 
     /**
      * @return the main directory name
@@ -32,6 +35,7 @@ public class DirectoryController {
         return this.mainDirectory.getName();
     }
 
+
     /**
      * @return main directory descriptor
      */
@@ -39,12 +43,15 @@ public class DirectoryController {
         return this.mainDirectory;
     }
 
+
     /**
-     * @return checkout directory descriptor; it is always a subdirectory 'checkout' of the main directory
+     * @return checkout directory descriptor; it is always a subdirectory 'checkout' of the main
+     *         directory
      */
     public File getCheckoutDirectory() {
         return this.checkoutDirectory;
     }
+
 
     /**
      * Deletes the main directory and all it's subdirectories
@@ -54,6 +61,7 @@ public class DirectoryController {
         deleteDirectory(this.mainDirectory);
     }
 
+
     /**
      * Recreates the main directory and also recreates it's subdirectory checkout
      */
@@ -62,6 +70,7 @@ public class DirectoryController {
         deleteDirectory(this.mainDirectory);
         this.checkoutDirectory.mkdirs();
     }
+
 
     private static boolean deleteDirectory(File dir) {
         LOG.trace("deleteDirectory(dir={})", dir);

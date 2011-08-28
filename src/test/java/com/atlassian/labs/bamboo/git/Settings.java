@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author David Matějček
  */
 public class Settings {
+
     private static final Logger LOG = LoggerFactory.getLogger(Settings.class);
 
     private static Properties settings;

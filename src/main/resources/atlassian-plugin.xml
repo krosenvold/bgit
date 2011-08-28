@@ -1,15 +1,14 @@
-<atlassian-plugin key="com.atlassian.labs.bamboo.git" name="git-plugin">
-    <plugin-info>
-        <description>Bamboo bgit plugin</description>
-        <version>${project.version}</version>
-    </plugin-info>
+<atlassian-plugin key="${project.groupId}" name="${project.name}" plugins-version="1">
 
+  <plugin-info>
+    <description>${project.description}</description>
+    <version>${project.version}</version>
+  </plugin-info>
 
-    <repository key="git" name="Git Repository"
-                     class="com.atlassian.labs.bamboo.git.GitRepository">
+  <repository key="git" name="Git Repository" class="com.atlassian.labs.bamboo.git.GitRepositoryPlugin">
     <description>A Git Repository</description>
-    <resource type="freemarker" name="edit" location="gitRepositoryEdit.ftl"/>
-    <resource type="freemarker" name="view" location="gitRepositoryView.ftl"/>
+    <resource type="freemarker" name="edit" location="gitRepositoryEdit.ftl" />
+    <resource type="freemarker" name="view" location="gitRepositoryView.ftl" />
   </repository>
 
 </atlassian-plugin>
