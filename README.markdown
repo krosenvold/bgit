@@ -2,10 +2,12 @@
 
 This plugin provides Git support to the excellent Atlassian Bamboo continous integration server.
 
-It is compatible with Bamboo 2.2.x and above, including 2.7.
+It is compatible with Bamboo 3.x and above.
 
-Version of 1.2.4 is tested with 2.7.3.
-Version 1.2.3 works only up to 2.7.1.
+* Version of 1.4-dm is tested with 3.2.1
+* Version of 1.3-dm is tested with 3.0.1
+* Version of 1.2.4 is tested with 2.7.3.
+* Version 1.2.3 works only up to 2.7.1.
 
 It also works on Windows, but requires cygwin git (not msysgit).
 
@@ -28,9 +30,9 @@ just because you sign up. Notifications of issues wrt upgrades or important bugs
 
 <h2>RELEASES</h2>
 
-The current release is 1.2.2 Only the latest release is available for
-<a href="http://cloud.github.com/downloads/krosenvold/bgit/git-plugin-1.2.3.jar">download</a>. Older releases will have to be built from
-source, which is really easy.
+The current release compatible with Bamboo 3.2 is 1.4-dm: <a href="https://github.com/downloads/dmatej/bgit/git-plugin-1.4-dm.jar">download</a>.
+
+The release compatible with Bamboo 3.0 is 1.3-dm: <a href="https://github.com/downloads/dmatej/bgit/git-plugin-1.3-dm.jar">download</a>.
 
 <h3>Branch/Release policy</h3>
 
@@ -44,7 +46,7 @@ over maintaining the project)
 <h2>HOW TO BUILD FROM SOURCE</h2>
 
 <pre>
-git clone git://github.com/krosenvold/bgit.git
+git clone git://github.com/dmatej/bgit.git
 cd bgit
 # optionally checkout an old version from a tag
 mvn install
@@ -59,7 +61,7 @@ mvn install
 A lot of people prefer a double symlink installation of the jar file when building from source:
 Assumes bgit is in  ~/bgit
 <pre>
-ln -s ~/bgit/target/git-plugin-1.2-SNAPSHOT.jar  ~/current-git-plugin
+ln -s ~/bgit/target/git-plugin-1.3-SNAPSHOT.jar  ~/current-git-plugin
 ln -s ~/current-git-plugin $BAMBOO_INSTALL_DIR/webapp/WEB-INF/lib/git-plugin.jar
 </pre>
 In this way you can just change the symlink in your home directory as the version number changes, instead of
@@ -77,7 +79,7 @@ Now when you create or edit plans you will be able to select “Git” as the
 repository provider.
 
 The plugin delegates most of its configuration to the underlying os shell. As long as this is set up properly, you
-should be able to access the repositories. 
+should be able to access the repositories.
 
 All the groundwork was done by Don Brown from Atlassian. Until Atlassian can
 provide resources to the plugin I will be mantaining it here on github
@@ -97,6 +99,18 @@ able to checkout neither.
 
 <h2>Release notes</h2>
 
+1.4-dm
+
+* Support for Bamboo 3.2
+
+1.3-dm
+
+* Big refactoring
+* Changed plugin shortkey in settings
+* Custom plugin name
+* Fixed property collision with the new Atlassian GIT plugin
+* Better logging
+
 1.2.3
 
 * Added bamboo 2.7 support
@@ -107,7 +121,7 @@ able to checkout neither.
 
 1.2.2 & 1.2.1
 
-Issue 8, 11 and 12 fixed in these two. Time for a binary release ;) 
+Issue 8, 11 and 12 fixed in these two. Time for a binary release ;)
 
 1.2 RELEASE NOTES
 
@@ -123,7 +137,7 @@ Issue 8, 11 and 12 fixed in these two. Time for a binary release ;)
 - This version includes greatly improved checkout/fetch/update algorithm that should also handle rebases
   fairly well. Change detection upon rebase is still somewhat in the blue - it shouldn't crash but it won't give
   too much valuable information either. That's what you get for messing with history.
-   
+
 
 
 1.1.8 RELEASE NOTES
@@ -156,7 +170,7 @@ All changes thanks to Ivan Sungurov (isungurov)
 (big thanks to Kristian Rosenvold)
 - This should support branches properly. Please note that when changing
   branches on a build, you still need to clean the build using the bamboo
-  console. 
+  console.
 
 - This should also fix the file list in the commit history view.
 

@@ -5,7 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.atlassian.labs.bamboo.git</groupId>
     <artifactId>git-plugin</artifactId>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>1.4.1-dm-SNAPSHOT</version>
+    <description>A Git Repository provider - GitHub implementation</description>
 
     <name>Bamboo Git plugin</name>
     <packaging>jar</packaging>
@@ -20,6 +21,14 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                  <include>atlassian-plugin.xml</include>
+                  <include>com/atlassian/labs/bamboo/git/bgit.properties</include>
+                </includes>
                 <filtering>true</filtering>
             </resource>
         </resources>
@@ -35,13 +44,23 @@
             </plugin>
         </plugins>
 
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
     </build>
 
 
     <scm>
-        <connection>scm:git:git://github.com/krosenvold/bgit.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/krosenvold/bgit.git</developerConnection>
-        <url>http://github.com/krosenvold/bgit</url>
+        <connection>scm:git:git://github.com/dmatej/bgit.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/dmatej/bgit.git</developerConnection>
+        <url>http://github.com/dmatej/bgit</url>
     </scm>
 
 
@@ -59,7 +78,7 @@
         <repository>
             <id>atlassian-m1-repository</id>
             <url>https://maven.atlassian.com/maven1</url>
-            <layout>legacy</layout>
+<!--             <layout>legacy</layout> -->
         </repository>
         <repository>
             <id>atlassian-3rdparty-repository</id>
@@ -130,10 +149,12 @@
     </dependencies>
 
     <properties>
-        <atlassian.plugin.key>com.atlassian.labs.bamboo.git.git-plugin</atlassian.plugin.key>
-        <atlassian.product.version>2.7</atlassian.product.version>
+        <atlassian.product.version>3.2</atlassian.product.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- override these properties in your own profile if you need it -->
+        <github.bamboo-git-plugin.name>BGit (GitHub)</github.bamboo-git-plugin.name>
     </properties>
 </project>
